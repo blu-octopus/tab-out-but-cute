@@ -133,18 +133,7 @@ The config file lives at `~/.mission-control/config.json`:
 | `baseUrl` | `https://api.deepseek.com` | Your LLM provider's API endpoint |
 | `model` | `deepseek-chat` | Which model to use |
 
-**Provider examples:**
-
-| Provider | `baseUrl` | `model` | Notes |
-|----------|-----------|---------|-------|
-| DeepSeek | `https://api.deepseek.com` | `deepseek-chat` | Cheapest. Recommended. |
-| OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` | More expensive but very capable |
-| Groq | `https://api.groq.com/openai/v1` | `llama-3.1-8b-instant` | Fast, free tier available |
-| Together | `https://api.together.xyz/v1` | `meta-llama/Llama-3-8b-chat-hf` | Good variety of models |
-| OpenRouter | `https://openrouter.ai/api/v1` | `anthropic/claude-3-haiku` | Access to many providers |
-| Ollama | `http://localhost:11434/v1` | `llama3` | Fully local, free, no API key needed |
-
-Legacy field names (`deepseekApiKey`, `deepseekBaseUrl`, `deepseekModel`) still work for backward compatibility.
+Tab Out works with **any OpenAI-compatible API** — just set the `baseUrl` to your provider's endpoint and pick a cheap/fast model (this is classification, not creative writing). DeepSeek, OpenAI, Groq, Together, OpenRouter, Ollama, Kimi, GLM, and many others all work.
 
 ### Custom Grouping Rules
 
