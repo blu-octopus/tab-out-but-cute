@@ -182,16 +182,10 @@ function playCloseSound() {
  */
 function animateCardOut(card) {
   if (!card) return;
-  // Set explicit max-height so the collapse transition has a starting value
-  card.style.maxHeight = card.offsetHeight + 'px';
-  // Phase 1: fade + slide
+  // Phase 1: fade + scale down
   card.classList.add('closing');
-  // Phase 2: collapse height after fade finishes
-  setTimeout(() => {
-    card.classList.add('collapsed');
-    // Phase 3: remove from DOM after collapse
-    setTimeout(() => card.remove(), 280);
-  }, 320);
+  // Phase 2: remove from DOM after animation
+  setTimeout(() => card.remove(), 300);
 }
 
 function showToast(message) {
@@ -394,7 +388,7 @@ function renderOpenTabsMissionCard(mission, missionIndex) {
   }
 
   return `
-    <div class="mission-card" data-open-mission-id="${stableId}">
+    <div class="mission-card has-active-bar" data-open-mission-id="${stableId}">
       <div class="status-bar active"></div>
       <div class="mission-content">
         <div class="mission-top">
@@ -519,31 +513,35 @@ function renderMissionCard(mission, openTabCount) {
  * Fills the 10 scatter dots based on how many active missions exist.
  * Over 5 missions = "high scatter" (red dots).
  */
-function renderScatterBar(missionCount) {
+/**
+ * renderScatterBar(tabCount, domainCount)
+ *
+ * Focus level is based on how many unique domains you're spread across.
+ * The bar shows 10 dots scaled to the domain count.
+ * 1-3 domains = focused (green), 4-6 = moderate (amber), 7+ = scattered (red)
+ */
+function renderScatterBar(tabCount, domainCount) {
   const barEl = document.getElementById('scatterBar');
   const captionEl = document.getElementById('scatterCaption');
   if (!barEl || !captionEl) return;
 
-  const isHigh = missionCount > 5;
+  const isHigh = domainCount > 6;
+  const isMod = domainCount > 3;
 
-  // Build 10 dots; fill the first `missionCount` of them
   let dotsHtml = '';
   for (let i = 0; i < 10; i++) {
-    const filled = i < missionCount;
+    const filled = i < Math.min(domainCount, 10);
     const highClass = filled && isHigh ? ' high' : '';
     dotsHtml += `<div class="scatter-dot${filled ? ' filled' : ''}${highClass}"></div>`;
   }
   barEl.innerHTML = dotsHtml;
 
-  // Caption text
   let level = 'focused';
-  if (missionCount > 5) level = 'high scatter';
-  else if (missionCount > 2) level = 'moderate scatter';
+  if (isHigh) level = 'scattered';
+  else if (isMod) level = 'moderate';
 
-  captionEl.textContent = `${missionCount} parallel mission${missionCount !== 1 ? 's' : ''} — ${level}`;
-
-  // Caption color: amber normally, rose when high scatter
-  captionEl.style.color = isHigh ? 'var(--status-abandoned)' : 'var(--accent-amber)';
+  captionEl.textContent = `${tabCount} tab${tabCount !== 1 ? 's' : ''} across ${domainCount} site${domainCount !== 1 ? 's' : ''} — ${level}`;
+  captionEl.style.color = isHigh ? 'var(--status-abandoned)' : isMod ? 'var(--accent-amber)' : 'var(--status-active)';
 }
 
 
@@ -677,7 +675,7 @@ function renderDomainCard(group, groupIndex) {
   }
 
   return `
-    <div class="mission-card domain-card" data-domain-id="${stableId}">
+    <div class="mission-card domain-card ${hasDupes ? 'has-amber-bar' : 'has-neutral-bar'}" data-domain-id="${stableId}">
       <div class="status-bar"${statusBarStyle}></div>
       <div class="mission-content">
         <div class="mission-top">
@@ -832,7 +830,7 @@ async function renderStaticDashboard() {
   }
 
   // ── Step 7: Scatter bar (based on domain group count) ────────────────────
-  renderScatterBar(domainGroups.length);
+  renderScatterBar(realTabs.length, domainGroups.length);
 
   // ── Step 8: Footer stats ─────────────────────────────────────────────────
   const statMissions = document.getElementById('statMissions');
@@ -947,7 +945,13 @@ async function renderAIDashboard(options = {}) {
   if (topSitesSection) topSitesSection.style.display = 'none';
 
   // ── Scatter bar (based on AI mission count) ───────────────────────────────
-  renderScatterBar(openTabMissions.length);
+  // Count unique domains across AI missions
+  const aiDomains = new Set();
+  openTabMissions.forEach(m => (m.tabs || []).forEach(t => {
+    try { aiDomains.add(new URL(t.url).hostname); } catch {}
+  }));
+  const aiTabCount = openTabMissions.reduce((s, m) => s + (m.tabs || []).length, 0);
+  renderScatterBar(aiTabCount, aiDomains.size);
 
   // ── Stale tabs ─────────────────────────────────────────────────────────────
   const clusteredTabUrls = new Set(

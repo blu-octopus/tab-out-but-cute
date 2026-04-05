@@ -248,8 +248,8 @@ header {
 
 /* ---- Mission Cards ---- */
 .missions {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
   margin-bottom: 40px;
 }
@@ -258,54 +258,60 @@ header {
   background: var(--card-bg);
   border: 1px solid var(--warm-gray);
   border-radius: 8px;
-  padding: 20px 24px;
-  display: grid;
-  grid-template-columns: 4px 1fr auto;
-  gap: 0 20px;
-  align-items: start;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Colored top border instead of side bar for grid cards */
+.mission-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--warm-gray);
+}
+
+.mission-card.has-active-bar::before { background: var(--status-active); }
+.mission-card.has-amber-bar::before { background: var(--accent-amber); }
+.mission-card.has-neutral-bar::before { background: var(--warm-gray); }
 
 .mission-card:hover {
   box-shadow: 0 4px 20px var(--shadow);
   transform: translateY(-1px);
 }
 
-/* Closing animation — two phases for smoothness:
-   Phase 1: card fades and slides right (opacity + transform, GPU-accelerated)
-   Phase 2: height collapses via JS adding .collapsed class after fade */
+/* Closing animation — card scales down and fades out */
 .mission-card.closing {
   opacity: 0;
-  transform: translateX(60px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(0.9);
+  transition: opacity 0.25s ease, transform 0.25s ease;
   pointer-events: none;
 }
 
 .mission-card.collapsed {
-  max-height: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-  border-width: 0 !important;
-  overflow: hidden;
-  transition: max-height 0.25s ease, padding 0.25s ease, margin 0.25s ease, border-width 0.25s ease;
+  display: none !important;
 }
 
+/* Old side status bar — hidden, replaced by top border via ::before */
 .status-bar {
-  width: 4px;
-  height: 100%;
-  min-height: 48px;
-  border-radius: 2px;
-  align-self: stretch;
+  display: none;
 }
-
-.status-bar.active { background: var(--status-active); }
-.status-bar.cooling { background: var(--status-cooling); }
-.status-bar.abandoned { background: var(--status-abandoned); }
 
 .mission-content {
   min-width: 0;
+}
+
+/* Hide the right-side meta (page count) — info is already in the badge */
+.mission-meta {
+  display: none;
 }
 
 .mission-top {
@@ -402,11 +408,7 @@ header {
   background: rgba(200, 113, 58, 0.06);
 }
 
-.mission-meta {
-  text-align: right;
-  white-space: nowrap;
-  padding-top: 2px;
-}
+/* mission-meta hidden — see above */
 
 .mission-time {
   font-size: 12px;
