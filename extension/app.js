@@ -16,6 +16,469 @@
 'use strict';
 
 
+/* ================================================================
+   DOMAIN  -- CATEGORY MAPPING
+   ================================================================ */
+
+const DOMAIN_CATEGORY_MAP = {
+  // Work
+  'notion.so':'work','slack.com':'work','zoom.us':'work','teams.microsoft.com':'work',
+  'outlook.live.com':'work','outlook.office365.com':'work','outlook.office.com':'work',
+  'calendar.google.com':'work','drive.google.com':'work','docs.google.com':'work',
+  'sheets.google.com':'work','slides.google.com':'work','airtable.com':'work',
+  'asana.com':'work','trello.com':'work','monday.com':'work','linear.app':'work',
+  'clickup.com':'work','dropbox.com':'work','box.com':'work','loom.com':'work',
+  'gmail.com':'work','google.com':'work',
+  // School
+  'canvas.instructure.com':'school','blackboard.com':'school',
+  'coursera.org':'school','khanacademy.org':'school','edx.org':'school',
+  'udemy.com':'school','chegg.com':'school','quizlet.com':'school',
+  'piazza.com':'school','overleaf.com':'school','scholar.google.com':'school',
+  'jstor.org':'school','gatech.edu':'school','udacity.com':'school',
+  'omscentral.com':'school','gradescope.com':'school',
+  // Jobs / Career
+  'linkedin.com':'jobs','indeed.com':'jobs','glassdoor.com':'jobs',
+  'lever.co':'jobs','greenhouse.io':'jobs','workday.com':'jobs',
+  'handshake.com':'jobs','wellfound.com':'jobs','angellist.com':'jobs',
+  'ziprecruiter.com':'jobs','monster.com':'jobs','hired.com':'jobs',
+  'myworkdayjobs.com':'jobs','icims.com':'jobs',
+  // Art / Design
+  'figma.com':'art','dribbble.com':'art','behance.net':'art',
+  'pinterest.com':'art','canva.com':'art','adobe.com':'art',
+  'unsplash.com':'art','pexels.com':'art','deviantart.com':'art',
+  'artstation.com':'art','coolors.co':'art','awwwards.com':'art',
+  // Social
+  'twitter.com':'social','x.com':'social','instagram.com':'social',
+  'facebook.com':'social','tiktok.com':'social','snapchat.com':'social',
+  'discord.com':'social','telegram.org':'social','threads.net':'social',
+  // Relax / Entertainment
+  'youtube.com':'relax','netflix.com':'relax','hulu.com':'relax',
+  'spotify.com':'relax','twitch.tv':'relax','reddit.com':'relax',
+  'disneyplus.com':'relax','crunchyroll.com':'relax','primevideo.com':'relax',
+  'tumblr.com':'relax','webtoons.com':'relax',
+  // Dev
+  'github.com':'dev','gitlab.com':'dev','stackoverflow.com':'dev',
+  'codepen.io':'dev','codesandbox.io':'dev','replit.com':'dev',
+  'vercel.com':'dev','netlify.com':'dev','npmjs.com':'dev',
+  'developer.mozilla.org':'dev','localhost':'dev',
+  // Finance
+  'chase.com':'finance','bankofamerica.com':'finance','wellsfargo.com':'finance',
+  'paypal.com':'finance','venmo.com':'finance','robinhood.com':'finance',
+  'coinbase.com':'finance','mint.com':'finance','nerdwallet.com':'finance',
+  'fidelity.com':'finance','vanguard.com':'finance',
+  // AI
+  'chat.openai.com':'ai','openai.com':'ai','claude.ai':'ai',
+  'perplexity.ai':'ai','gemini.google.com':'ai','copilot.microsoft.com':'ai',
+  // Housing
+  'zillow.com':'housing','apartments.com':'housing','apartmentlist.com':'housing',
+  'trulia.com':'housing','redfin.com':'housing','rentatlasapts.com':'housing',
+  // Health
+  'myfitnesspal.com':'health','headspace.com':'health','calm.com':'health',
+  'zocdoc.com':'health','webmd.com':'health',
+  // Shopping
+  'amazon.com':'shopping','ebay.com':'shopping','etsy.com':'shopping',
+  'target.com':'shopping','walmart.com':'shopping',
+};
+
+const CATEGORY_CONFIG = {
+  work:     { color: '#889df0', textColor: '#1e2d6e', label: 'Work' },
+  school:   { color: '#f7cd67', textColor: '#5a3c00', label: 'School' },
+  jobs:     { color: '#e59266', textColor: '#5a2500', label: 'Jobs' },
+  art:      { color: '#f8a6b2', textColor: '#6b1535', label: 'Art' },
+  social:   { color: '#b77dee', textColor: '#3d1060', label: 'Social' },
+  relax:    { color: '#82d5bb', textColor: '#0d4a35', label: 'Relax' },
+  dev:      { color: '#8ac68a', textColor: '#133d13', label: 'Dev' },
+  finance:  { color: '#6fba2c', textColor: '#1a4400', label: 'Finance' },
+  ai:       { color: '#19c8b9', textColor: '#083530', label: 'AI' },
+  housing:  { color: '#e18c6f', textColor: '#4a1a08', label: 'Housing' },
+  health:   { color: '#fc736d', textColor: '#4a0808', label: 'Health' },
+  shopping: { color: '#f7cd67', textColor: '#5a3c00', label: 'Shopping' },
+};
+
+function getDomainCategory(domain) {
+  if (!domain) return null;
+  const d = domain.toLowerCase().replace(/^www\./, '');
+  if (DOMAIN_CATEGORY_MAP[d]) return CATEGORY_CONFIG[DOMAIN_CATEGORY_MAP[d]];
+  for (const [key, cat] of Object.entries(DOMAIN_CATEGORY_MAP)) {
+    if (d.endsWith('.' + key) || d.includes(key + '.')) return CATEGORY_CONFIG[cat];
+  }
+  return null;
+}
+
+
+/* ================================================================
+   EISENHOWER MATRIX  - Focus Panel
+   ================================================================ */
+
+const MATRIX_KEY = 'matrixTasks';
+
+async function loadMatrixTasks() {
+  try { return (await chrome.storage.local.get([MATRIX_KEY]))[MATRIX_KEY] || []; } catch { return []; }
+}
+
+async function saveMatrixTasks(tasks) {
+  try { await chrome.storage.local.set({ [MATRIX_KEY]: tasks }); } catch {}
+}
+
+const Q_CONFIG = {
+  do:       { icon: '\u{1F534}', label: 'Do',       sub: 'urgent \u00B7 important',       color: '#f8a6b2', text: '#6b1535' },
+  schedule: { icon: '\u{1F535}', label: 'Schedule', sub: 'not urgent \u00B7 important',   color: '#889df0', text: '#1e2d6e' },
+  delegate: { icon: '\u{1F7E1}', label: 'Delegate', sub: 'urgent \u00B7 less important',  color: '#f7cd67', text: '#5a3c00' },
+  cut:      { icon: '\u26AA',    label: 'Cut',       sub: 'eliminate',                     color: '#e6dfc9', text: '#7a6855' },
+};
+
+/* ============================================================
+   VILLAGER DANCER - cycles through GIFs in assets/villager dancing/
+   ============================================================ */
+const VILLAGER_CAST = [
+  {
+    file: 'ankha-egyptian-cat.gif', name: 'Ankha',
+    lines: [
+      'I am ancient, and I am fabulous.',
+      'The pharaohs themselves approved this choreography.',
+      'Do not stare. Well... actually, you may stare.',
+    ]
+  },
+  {
+    file: 'bill-duck.gif', name: 'Bill',
+    lines: [
+      'BAM! That\'s how you do it, broccoflower!',
+      'I\'m on FIRE today, for real for real!',
+      'Nothing beats a good groove, broccoflower!',
+    ]
+  },
+  {
+    file: 'chillaxing.gif', name: 'Villager',
+    lines: [
+      'Just vibin\'... no stress here.',
+      'Life is good when you just let it flow.',
+      'Chill mode: permanently activated.',
+    ]
+  },
+  {
+    file: 'eugene-koala.gif', name: 'Eugene',
+    lines: [
+      'Cool of you to notice, sugarplum.',
+      'I make this look completely effortless. Obviously.',
+      'Some are simply born with it, gorgeous.',
+    ]
+  },
+  {
+    file: 'fauna-deer.gif', name: 'Fauna',
+    lines: [
+      'Oh goodness! Dancing is toadally fun, dearie!',
+      'Every step is a little gift to the world!',
+      'I just love a good twirl, toadally!',
+    ]
+  },
+  {
+    file: 'isabelle.gif', name: 'Isabelle',
+    lines: [
+      'Oh! Tom Nook said I could take a short break...',
+      'Just one more song! Then back to the reports!',
+      'Everything is just wonderful, sir/ma\'am!',
+    ]
+  },
+  {
+    file: 'katt-animal-crossing.gif', name: 'Katt',
+    lines: [
+      'What? I wasn\'t dancing. I was... exercising.',
+      'Don\'t get the wrong idea, punk.',
+      'Fine. MAYBE I\'m having fun. A little. Whatever.',
+    ]
+  },
+  {
+    file: 'mrksza.gif', name: 'Villager',
+    lines: [
+      'Best. Day. Ever!',
+      'Nook miles, here I come!',
+      'Living my best island life right now!',
+    ]
+  },
+  {
+    file: 'punchy-explode.gif', name: 'Punchy',
+    lines: [
+      'WOAH-- okay that was a lot, lazy boy.',
+      'Did you see that?! Even I\'m impressed, lazy boy.',
+      'I don\'t know what just happened but I\'m into it.',
+    ]
+  },
+  {
+    file: 'punchy.gif', name: 'Punchy',
+    lines: [
+      'Yo... I\'m kinda tired but this helps, lazy boy.',
+      'One more song, then I\'m napping. Promise, lazy boy.',
+      'Z z z... wait, was I dancing? Cool, lazy boy.',
+    ]
+  },
+  {
+    file: 'quinn.gif', name: 'Quinn',
+    lines: [
+      'Magnificent, isn\'t it? I\'ve been training, gorgeous.',
+      'Eagles were born to soar AND to dance, gorgeous.',
+      'Observe and learn. This is artistry, gorgeous.',
+    ]
+  },
+  {
+    file: 'rudy.gif', name: 'Rudy',
+    lines: [
+      'YEAH! Feel the BURN, ace!',
+      'Rudy NEVER stops! NEVER, ace!',
+      'THIS IS MY CARDIO, ACE! WOOOOO!',
+    ]
+  },
+  {
+    file: 'sasha.gif', name: 'Sasha',
+    lines: [
+      'I\'ll need a snack after this... cupcake?',
+      'Dancing AND cookies. That is my entire plan, cupcake.',
+      'I\'m adorable AND talented. You\'re welcome, cupcake~',
+    ]
+  },
+  {
+    file: 'villager.gif', name: 'Villager',
+    lines: [
+      'Nook miles... here I come!',
+      'Island life is the best life!',
+      'Tom Nook would be so proud right now, yes yes!',
+    ]
+  },
+];
+
+/**
+ * initVillagerDancer() - cycles through villager GIFs near the footer,
+ * showing in-character dialogue on hover.
+ */
+function initVillagerDancer() {
+  const img    = document.getElementById('villagerDancer');
+  const bubble = document.getElementById('villagerBubble');
+  const wrap   = document.getElementById('villagerFooter');
+  if (!img || !bubble || !wrap) return;
+
+  let idx = Math.floor(Math.random() * VILLAGER_CAST.length);
+
+  function setVillager(i) {
+    const v = VILLAGER_CAST[i];
+    img.src = 'assets/villager dancing/' + v.file;
+    img.alt = v.name;
+  }
+
+  setVillager(idx);
+
+  // Cycle every 10 s with a smooth fade
+  setInterval(() => {
+    img.style.opacity = '0';
+    setTimeout(() => {
+      idx = (idx + 1) % VILLAGER_CAST.length;
+      bubble.classList.remove('visible');
+      setVillager(idx);
+      img.style.opacity = '1';
+    }, 370);
+  }, 10000);
+
+  // Hover: show a random dialogue line for the current villager
+  wrap.addEventListener('mouseenter', () => {
+    const v = VILLAGER_CAST[idx];
+    bubble.textContent = v.lines[Math.floor(Math.random() * v.lines.length)];
+    bubble.classList.add('visible');
+  });
+  wrap.addEventListener('mouseleave', () => {
+    bubble.classList.remove('visible');
+  });
+}
+
+/** Escape text for HTML content */
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/** Render task text, highlighting @mentions as styled chips */
+function renderTaskText(raw) {
+  return esc(raw).replace(/@(\S+)/g, '<span class="at-tag">@$1</span>');
+}
+
+async function renderMatrixColumn() {
+  const panel = document.getElementById('matrixColumn');
+  if (!panel) return;
+  const tasks = await loadMatrixTasks();
+
+  // Whole-row is the click target for toggle; delete button stops propagation
+  const renderItem = (t) => `
+    <div class="matrix-item${t.done ? ' done' : ''}"
+         data-action="toggle-matrix-task" data-task-id="${t.id}">
+      <span class="matrix-cb-visual${t.done ? ' checked' : ''}"></span>
+      <span class="matrix-item-text">${renderTaskText(t.text)}</span>
+      <button class="matrix-item-del" data-action="delete-matrix-task"
+              data-task-id="${t.id}" title="Remove">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+             stroke-width="2.5" stroke="currentColor" width="10" height="10">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>`;
+
+  const renderQ = (q) => {
+    const c = Q_CONFIG[q];
+    const items = tasks.filter(t => t.quadrant === q);
+    return `
+      <div class="matrix-quadrant q-${q}" style="--qc:${c.color};--qt:${c.text}">
+        <div class="matrix-q-hd">
+          <span>${c.icon}</span><strong>${c.label}</strong>
+          <span class="matrix-q-sub">${c.sub}</span>
+        </div>
+        <div class="matrix-q-list">
+          ${items.length ? items.map(renderItem).join('') : '<span class="matrix-q-empty">\u2014</span>'}
+        </div>
+      </div>`;
+  };
+
+  // Preserve active pill selection across re-renders
+  const prevActive = document.querySelector('#matrixQPills .q-pill.active')?.dataset.q || 'do';
+
+  panel.innerHTML = `
+    <div class="section-header" style="margin-bottom:10px">
+      <h2>To-Do</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="matrix-q-pills" id="matrixQPills">
+      ${Object.entries(Q_CONFIG).map(([q,c]) => `
+        <button class="q-pill${q===prevActive?' active':''}" data-q="${q}"
+                data-action="select-matrix-q"
+                style="--qc:${c.color};--qt:${c.text}">${c.icon} ${c.label}</button>`).join('')}
+    </div>
+    <div class="matrix-input-wrap">
+      <input id="matrixInput" class="matrix-input" placeholder="Add a task\u2026" autocomplete="off">
+      <span class="matrix-input-hint">enter to add</span>
+      <div class="at-mention-dropdown" id="atMentionDropdown" style="display:none"></div>
+    </div>
+    <div class="matrix-grid">
+      ${['do','schedule','delegate','cut'].map(renderQ).join('')}
+    </div>`;
+}
+
+async function addMatrixTask(text, quadrant) {
+  if (!text.trim()) return;
+  const tasks = await loadMatrixTasks();
+  tasks.push({ id: Date.now().toString(36), text: text.trim(), quadrant, done: false, at: Date.now() });
+  await saveMatrixTasks(tasks);
+  await renderMatrixColumn();
+}
+
+async function toggleMatrixTask(id) {
+  const tasks = await loadMatrixTasks();
+  const t = tasks.find(t => t.id === id);
+  if (t) t.done = !t.done;
+  await saveMatrixTasks(tasks);
+  await renderMatrixColumn();
+}
+
+async function deleteMatrixTask(id) {
+  await saveMatrixTasks((await loadMatrixTasks()).filter(t => t.id !== id));
+  await renderMatrixColumn();
+}
+
+
+/* ================================================================
+   @ MENTION AUTOCOMPLETE
+   ================================================================ */
+
+let _atStart = -1; // index of '@' in current input value
+
+function _getAtQuery(input) {
+  const val = input.value;
+  const cur = input.selectionStart;
+  // Walk left from cursor looking for '@' without spaces
+  for (let i = cur - 1; i >= 0; i--) {
+    if (val[i] === '@') return { start: i, query: val.slice(i + 1, cur).toLowerCase() };
+    if (val[i] === ' ') break;
+  }
+  return null;
+}
+
+function showAtMentionDropdown(input) {
+  const info = _getAtQuery(input);
+  const dropdown = document.getElementById('atMentionDropdown');
+  if (!info || !dropdown) { hideAtMentionDropdown(); return; }
+
+  _atStart = info.start;
+  const q = info.query;
+
+  // Build candidate list from openTabs
+  const seen = new Set();
+  const groups = new Map();
+  for (const tab of openTabs) {
+    try {
+      const host = new URL(tab.url).hostname.replace(/^www\./, '');
+      if (!groups.has(host)) groups.set(host, { tabs: [] });
+      groups.get(host).tabs.push(tab);
+    } catch {}
+  }
+
+  const options = [];
+
+  // Domain groups first (no query OR query matches domain/friendly name)
+  for (const [host, grp] of groups) {
+    const friendly = FRIENDLY_DOMAINS[host] || FRIENDLY_DOMAINS['www.' + host] || host;
+    const matchKey = (friendly + ' ' + host).toLowerCase();
+    if (!q || matchKey.includes(q)) {
+      options.push({ type: 'group', label: friendly, domain: host, count: grp.tabs.length });
+      seen.add('group:' + host);
+    }
+  }
+
+  // Individual tabs (only when user has typed something after @)
+  if (q.length >= 1) {
+    for (const tab of openTabs) {
+      const key = 'tab:' + tab.url;
+      if (seen.has(key)) continue;
+      const titleLow = (tab.title || '').toLowerCase();
+      const urlLow   = (tab.url  || '').toLowerCase();
+      if (titleLow.includes(q) || urlLow.includes(q)) {
+        let host = '';
+        try { host = new URL(tab.url).hostname.replace(/^www\./, ''); } catch {}
+        options.push({ type: 'tab', label: tab.title || tab.url, domain: host, url: tab.url });
+        seen.add(key);
+      }
+    }
+  }
+
+  if (options.length === 0) { hideAtMentionDropdown(); return; }
+
+  dropdown.innerHTML = options.slice(0, 8).map(opt => {
+    const fav = opt.domain
+      ? `<img class="at-favicon" src="https://www.google.com/s2/favicons?domain=${esc(opt.domain)}&sz=16" onerror="this.style.opacity=0" alt="">`
+      : '';
+    const badge = opt.type === 'group'
+      ? `<span class="at-mention-badge">${opt.count} tab${opt.count !== 1 ? 's' : ''}</span>`
+      : `<span class="at-mention-badge at-mention-badge--tab">tab</span>`;
+    return `<button class="at-mention-item" data-action="insert-at-mention"
+                    data-at-label="${esc(opt.label)}">${fav}
+              <span class="at-mention-label">${esc(opt.label)}</span>${badge}
+            </button>`;
+  }).join('');
+
+  dropdown.style.display = 'block';
+}
+
+function hideAtMentionDropdown() {
+  const d = document.getElementById('atMentionDropdown');
+  if (d) d.style.display = 'none';
+  _atStart = -1;
+}
+
+function insertAtMention(label) {
+  const input = document.getElementById('matrixInput');
+  if (!input || _atStart < 0) return;
+  const before = input.value.slice(0, _atStart);
+  const after  = input.value.slice(input.selectionStart).replace(/^\S*/, ''); // remove partial token
+  input.value  = before + '@' + label + ' ' + after.trimStart();
+  hideAtMentionDropdown();
+  input.focus();
+  const pos = before.length + label.length + 2;
+  input.setSelectionRange(pos, pos);
+}
+
+
 /* ----------------------------------------------------------------
    CHROME TABS ??? Direct API Access
 
@@ -345,7 +808,7 @@ function playCloseSound() {
  * Pure CSS + JS, no libraries.
  */
 function shootConfetti(x, y) {
-  // NookPhone app palette ¡X Animal Crossing style
+  // NookPhone app palette  - Animal Crossing style
   const colors = [
     '#19c8b9', // mint teal
     '#6fba2c', // leaf green
@@ -494,14 +957,150 @@ function timeAgo(dateStr) {
   return diffDays + ' days ago';
 }
 
+/* ================================================================
+   AC-STYLE GREETING + WEATHER
+   Uses Open-Meteo (free, no API key) + browser geolocation.
+   All dialogue is written in Tom Nook / villager cadence.
+   ================================================================ */
+
+// Seeded pick: changes every hour so refresh doesn't flicker the message
+function acPick(arr) {
+  const d = new Date();
+  const seed = d.getFullYear() * 100000 + (d.getMonth() + 1) * 1000 + d.getDate() * 24 + d.getHours();
+  return arr[seed % arr.length];
+}
+
+const AC_LINES = {
+  morning: [
+    'Rise and shine, yes yes!',
+    'Up bright and early, hm~',
+    "Don't forget to water your flowers, hm?",
+    "Isabelle says good morning, yes yes!",
+    'A brand-new day in the village, hm hm!',
+    'The early bird catches the sea bass, yes yes!',
+    'Morning! Check the bulletin board, hm?',
+  ],
+  afternoon: [
+    'Turnip prices are in, yes yes!',
+    'The Able Sisters are open, hm~',
+    'Perfect day for the museum, yes yes!',
+    'Have you caught any rare fish today, hm?',
+    "Afternoon! Don't let the day slip by, hm hm!",
+    'A fine afternoon in the village, yes yes!',
+    'Check your mailbox  - packages waiting, hm?',
+  ],
+  evening: [
+    'K.K. Slider plays on Saturdays, yes yes!',
+    'The stars come out soon, hm~',
+    "Don't forget to check your mail, hm?",
+    'Evening strolls are the best, yes yes!',
+    'Celeste might be out tonight, hm hm!',
+    'A peaceful evening in the village, yes yes!',
+  ],
+  night: [
+    'Up late, hm hm? Even Nook Inc. rests!',
+    'The shooting stars are lovely tonight, yes yes!',
+    'Still awake? Blathers approves, hm~',
+    'Night owl energy, yes yes! hm hm!',
+    "Past bedtime, hm... but who's counting?",
+    'Even Tom Nook sleeps eventually, hm~',
+  ],
+};
+
 /**
- * getGreeting() ??? "Good morning / afternoon / evening"
+ * getGreeting()  - time-based greeting, AC style
  */
 function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  const h = new Date().getHours();
+  if (h >= 5  && h < 12) return 'Good morning!';
+  if (h >= 12 && h < 17) return 'Good afternoon!';
+  if (h >= 17 && h < 21) return 'Good evening!';
+  return 'Good night~';
+}
+
+/**
+ * getGreetingSub()  - rotating AC villager dialogue for the current time slot
+ */
+function getGreetingSub() {
+  const h = new Date().getHours();
+  if (h >= 5  && h < 12) return acPick(AC_LINES.morning);
+  if (h >= 12 && h < 17) return acPick(AC_LINES.afternoon);
+  if (h >= 17 && h < 21) return acPick(AC_LINES.evening);
+  return acPick(AC_LINES.night);
+}
+
+/**
+ * WMO weather code  -- AC-style weather description.
+ * pct = precipitation probability (0-100), tempF = temperature in \u00B0F
+ */
+function buildWeatherLine(code, pct, tempF) {
+  const t = Math.round(tempF);
+  const tempStr = `${t}\u00B0F`;
+  const warmth = t < 40 ? 'Bundle up tight, hm!' : t > 88 ? 'Stay hydrated, yes yes!' : t < 55 ? 'Grab a jacket, hm~' : null;
+
+  // Weather icons via JS Unicode escapes - immune to file encoding corruption
+  const W = {
+    sun:   '\u2600\uFE0F',   // ??
+    part:  '\u26C5',          // ?
+    cloud: '\u2601\uFE0F',   // ??
+    fog:   '\u{1F32B}\uFE0F',// ??
+    rain1: '\u{1F326}\uFE0F',// ??
+    rain2: '\u{1F327}\uFE0F',// ??
+    snow:  '\u2744\uFE0F',   // ??
+    storm: '\u26C8\uFE0F',   // ??
+    part2: '\u{1F324}\uFE0F',// ??
+  };
+
+  let icon, desc;
+  if      (code === 0)                      { icon = W.sun;   desc = acPick(['Clear skies - perfect for bug-catching!', 'Sunny and bright, yes yes!', 'Beautiful day out there, hm~']); }
+  else if (code <= 2)                       { icon = W.part;  desc = acPick(['Partly cloudy, hm~ nice for a stroll!', 'Mostly sunny with clouds, yes yes!']); }
+  else if (code === 3)                      { icon = W.cloud; desc = acPick(['Overcast today, hm... The Roost is cozy!', 'Gray skies, yes yes! Good fishing weather~']); }
+  else if (code <= 48)                      { icon = W.fog;   desc = acPick(['Foggy out there, hm! Very mysterious~', 'Fog rolling in, yes yes! Stay on the paths!']); }
+  else if (code <= 55)                      { icon = W.rain1; desc = `Light drizzle today - ${pct}% chance, hm~`; }
+  else if (code <= 65 || (code <= 82 && code >= 80)) {
+    icon = W.rain2;
+    desc = pct >= 70
+      ? `${pct}% chance of rain! Grab that umbrella, yes yes!`
+      : `${pct}% chance of rain today, hm~ maybe bring a brolly!`;
+  }
+  else if (code <= 77 || (code >= 85 && code <= 86)) { icon = W.snow;  desc = acPick(['Snow today! Time to build a snowboy, yes yes!', "It's snowing, hm hm! Bundle up tight!"]); }
+  else if (code >= 95)                               { icon = W.storm; desc = acPick(['Thunderstorm! Even Tom Nook stays inside, hm!', 'Lightning today - stay cozy, yes yes!']); }
+  else {
+    icon = pct > 50 ? W.rain1 : W.part2;
+    desc = pct > 50 ? `${pct}% chance of rain, hm! Umbrella time~` : 'Decent weather today, yes yes!';
+  }
+
+  return [icon + ' ' + desc, tempStr, warmth].filter(Boolean).join('  \u00B7  ');
+}
+
+/**
+ * Fetch weather from Open-Meteo (free, no API key) using browser geolocation.
+ * Updates #weatherLine in the header.
+ */
+async function initWeather() {
+  const el = document.getElementById('weatherLine');
+  if (!el) return;
+
+  const FALLBACKS = [
+    '\u{1F343} Check outside - Isabelle has no signal today, hm~',
+    '\u{1F33F} Weather unknown! Tom Nook says venture out, yes yes!',
+    '\u{1F989} Blathers suggests: observe nature directly, hm~',
+  ];
+
+  try {
+    const pos = await new Promise((resolve, reject) =>
+      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 })
+    );
+    const { latitude: lat, longitude: lon } = pos.coords;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=temperature_2m,precipitation_probability,weathercode&temperature_unit=fahrenheit&timezone=auto`;
+    const data = await (await fetch(url)).json();
+    const cur = data.current;
+    el.textContent = buildWeatherLine(cur.weathercode, cur.precipitation_probability ?? 0, cur.temperature_2m);
+  } catch {
+    el.textContent = acPick(FALLBACKS);
+  }
+
+  el.style.display = 'block';
 }
 
 /**
@@ -703,7 +1302,122 @@ const ICONS = {
   close:   `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>`,
   archive: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>`,
   focus:   `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" /></svg>`,
+  grip:    `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="2" r="1.5"/><circle cx="8" cy="2" r="1.5"/><circle cx="2" cy="7" r="1.5"/><circle cx="8" cy="7" r="1.5"/><circle cx="2" cy="12" r="1.5"/><circle cx="8" cy="12" r="1.5"/></svg>`,
 };
+
+
+/* ================================================================
+   DRAG-AND-DROP  - Tab reassignment + Group merge
+   ================================================================ */
+
+const TAB_REASSIGN_KEY = 'tabReassignments';
+const GROUP_MERGE_KEY  = 'groupMerges';
+
+async function loadTabReassignments() {
+  try { return (await chrome.storage.local.get([TAB_REASSIGN_KEY]))[TAB_REASSIGN_KEY] || {}; } catch { return {}; }
+}
+async function saveTabReassignments(data) {
+  try { await chrome.storage.local.set({ [TAB_REASSIGN_KEY]: data }); } catch {}
+}
+async function loadGroupMerges() {
+  try { return (await chrome.storage.local.get([GROUP_MERGE_KEY]))[GROUP_MERGE_KEY] || []; } catch { return []; }
+}
+async function saveGroupMerges(data) {
+  try { await chrome.storage.local.set({ [GROUP_MERGE_KEY]: data }); } catch {}
+}
+
+async function reassignTab(url, targetDomain) {
+  const data = await loadTabReassignments();
+  data[url] = targetDomain;
+  await saveTabReassignments(data);
+}
+
+async function mergeGroupDomains(domain1, domain2) {
+  const merges = await loadGroupMerges();
+  const m1 = merges.find(m => m.domains.includes(domain1));
+  const m2 = merges.find(m => m.domains.includes(domain2));
+  if (m1 && m2 && m1 !== m2) {
+    m1.domains.push(...m2.domains.filter(d => !m1.domains.includes(d)));
+    merges.splice(merges.indexOf(m2), 1);
+  } else if (m1) {
+    if (!m1.domains.includes(domain2)) m1.domains.push(domain2);
+  } else if (m2) {
+    if (!m2.domains.includes(domain1)) m2.domains.push(domain1);
+  } else {
+    merges.push({ id: Date.now().toString(36), domains: [domain1, domain2] });
+  }
+  await saveGroupMerges(merges);
+}
+
+async function unmergeGroup(mergeId) {
+  await saveGroupMerges((await loadGroupMerges()).filter(m => m.id !== mergeId));
+}
+
+/**
+ * Apply stored tab reassignments and group merges to the live domainGroups array.
+ * Mutates the array in-place.
+ */
+async function applyDragCustomizations(groups) {
+  const reassign = await loadTabReassignments();
+  const merges   = await loadGroupMerges();
+
+  // --- Tab reassignments: move individual tabs to different cards ---
+  for (const [url, targetDomain] of Object.entries(reassign)) {
+    const src = groups.find(g => g.tabs.some(t => t.url === url));
+    const tgt = groups.find(g => g.domain === targetDomain);
+    if (!src || !tgt || src === tgt) continue;
+    const tab = src.tabs.find(t => t.url === url);
+    if (!tab) continue;
+    src.tabs = src.tabs.filter(t => t.url !== url);
+    tgt.tabs.push(tab);
+  }
+  // Remove cards that lost all their tabs via reassignment
+  for (let i = groups.length - 1; i >= 0; i--) {
+    if (groups[i].tabs.length === 0) groups.splice(i, 1);
+  }
+
+  // --- Group merges: combine multiple domain cards into one ---
+  for (const merge of merges) {
+    const targets = groups.filter(g => merge.domains.includes(g.domain));
+    if (targets.length < 2) continue;
+    const primary = targets[0];
+    for (const g of targets.slice(1)) {
+      primary.tabs.push(...g.tabs);
+      groups.splice(groups.indexOf(g), 1);
+    }
+    primary.label        = targets.map(g => friendlyDomain(g.domain)).join(' + ');
+    primary.mergeId      = merge.id;
+    primary.mergedDomains = merge.domains;
+  }
+}
+
+// --- Drag state ---
+let currentDrag   = null; // { type:'tab'|'group', url?, fromDomain?, domain? }
+let dragOverCard  = null; // current hovered .mission-card
+let mergeTimer    = null; // setTimeout handle for shake trigger
+
+function _showDragHint(text) {
+  const el = document.getElementById('dragHint');
+  if (el) { el.textContent = text; el.classList.add('visible'); }
+}
+function _hideDragHint() {
+  const el = document.getElementById('dragHint');
+  if (el) el.classList.remove('visible');
+}
+function _clearDragOverCard() {
+  if (dragOverCard) {
+    dragOverCard.classList.remove('drop-target', 'merge-target', 'merge-shake');
+    dragOverCard = null;
+  }
+  clearTimeout(mergeTimer);
+  mergeTimer = null;
+}
+function _clearDragState() {
+  document.querySelectorAll('.drag-source').forEach(el => el.classList.remove('drag-source'));
+  _clearDragOverCard();
+  _hideDragHint();
+  currentDrag = null;
+}
 
 
 /* ----------------------------------------------------------------
@@ -760,18 +1474,21 @@ function checkTabOutDupes() {
    OVERFLOW CHIPS ("+N more" expand button in domain cards)
    ---------------------------------------------------------------- */
 
-function buildOverflowChips(hiddenTabs, urlCounts = {}) {
+function buildOverflowChips(hiddenTabs, urlCounts = {}, sourceDomain = '') {
   const hiddenChips = hiddenTabs.map(tab => {
-    const label    = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), '');
-    const count    = urlCounts[tab.url] || 1;
-    const dupeTag  = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
+    const label     = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), '');
+    const count     = urlCounts[tab.url] || 1;
+    const dupeTag   = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
     const chipClass = count > 1 ? ' chip-has-dupes' : '';
     const safeUrl   = (tab.url || '').replace(/"/g, '&quot;');
     const safeTitle = label.replace(/"/g, '&quot;');
     let domain = '';
     try { domain = new URL(tab.url).hostname; } catch {}
     const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=16` : '';
-    return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}">
+    return `<div class="page-chip clickable${chipClass}"
+         draggable="true"
+         data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
+         data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(sourceDomain)}">
       <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" onerror="this.src='icons/leaf-favicon.svg'">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
@@ -822,8 +1539,8 @@ function renderDomainCard(group) {
   </span>`;
 
   const dupeBadge = hasDupes
-    ? `<span class="open-tabs-badge" style="color:var(--accent-amber);background:rgba(200,113,58,0.08);">
-        ${totalExtras} duplicate${totalExtras !== 1 ? 's' : ''}
+    ? `<span class="open-tabs-badge dupe-badge">
+        ${totalExtras} dupe${totalExtras !== 1 ? 's' : ''}
       </span>`
     : '';
 
@@ -839,20 +1556,22 @@ function renderDomainCard(group) {
 
   const pageChips = visibleTabs.map(tab => {
     let label = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), group.domain);
-    // For localhost tabs, prepend port number so you can tell projects apart
     try {
       const parsed = new URL(tab.url);
       if (parsed.hostname === 'localhost' && parsed.port) label = `${parsed.port} ${label}`;
     } catch {}
-    const count    = urlCounts[tab.url];
-    const dupeTag  = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
+    const count     = urlCounts[tab.url];
+    const dupeTag   = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
     const chipClass = count > 1 ? ' chip-has-dupes' : '';
     const safeUrl   = (tab.url || '').replace(/"/g, '&quot;');
     const safeTitle = label.replace(/"/g, '&quot;');
     let domain = '';
     try { domain = new URL(tab.url).hostname; } catch {}
     const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=16` : '';
-    return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}">
+    return `<div class="page-chip clickable${chipClass}"
+         draggable="true"
+         data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
+         data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(group.domain)}">
       <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" onerror="this.src='icons/leaf-favicon.svg'">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
@@ -864,37 +1583,54 @@ function renderDomainCard(group) {
         </button>
       </div>
     </div>`;
-  }).join('') + (extraCount > 0 ? buildOverflowChips(uniqueTabs.slice(8), urlCounts) : '');
+  }).join('') + (extraCount > 0 ? buildOverflowChips(uniqueTabs.slice(8), urlCounts, group.domain) : '');
 
-  let actionsHtml = `
-    <button class="action-btn close-tabs" data-action="close-domain-tabs" data-domain-id="${stableId}">
-      ${ICONS.close}
-      Close all ${tabCount} tab${tabCount !== 1 ? 's' : ''}
-    </button>`;
-
+  // Only show "Close all" when there are 2+ tabs  - single-tab close lives on the chip itself
+  let actionsHtml = '';
+  if (tabCount > 1) {
+    actionsHtml += `
+      <button class="action-btn close-tabs" data-action="close-domain-tabs" data-domain-id="${stableId}">
+        ${ICONS.close}
+        Close all ${tabCount} tabs
+      </button>`;
+  }
   if (hasDupes) {
     const dupeUrlsEncoded = dupeUrls.map(([url]) => encodeURIComponent(url)).join(',');
     actionsHtml += `
       <button class="action-btn" data-action="dedup-keep-one" data-dupe-urls="${dupeUrlsEncoded}">
-        Close ${totalExtras} duplicate${totalExtras !== 1 ? 's' : ''}
+        Remove ${totalExtras} duplicate${totalExtras !== 1 ? 's' : ''}
       </button>`;
   }
 
+  // Category color coding
+  const cat = getDomainCategory(group.domain);
+  const borderColor = cat ? cat.color : (hasDupes ? '#f7cd67' : '#c4b89e');
+  const catLabel = cat ? `<span class="category-pill" style="background:${cat.color};color:${cat.textColor}">${cat.label}</span>` : '';
+
+  const unmergeBtn = group.mergeId
+    ? `<button class="unmerge-btn" data-action="unmerge-group" data-merge-id="${group.mergeId}" title="Split this merged group">split</button>`
+    : '';
+
   return `
-    <div class="mission-card domain-card ${hasDupes ? 'has-amber-bar' : 'has-neutral-bar'}" data-domain-id="${stableId}">
-      <div class="status-bar"></div>
+    <div class="mission-card domain-card" data-domain-id="${stableId}"
+         data-drag-domain="${esc(group.domain)}"
+         style="border-top-color:${borderColor}">
       <div class="mission-content">
         <div class="mission-top">
+          <span class="drag-handle" draggable="true"
+                data-drag-type="group" data-drag-domain="${esc(group.domain)}"
+                title="Drag onto another group to merge">${ICONS.grip}</span>
           <span class="mission-name">${isLanding ? 'Homepages' : (group.label || friendlyDomain(group.domain))}</span>
           ${tabBadge}
+          ${catLabel}
           ${dupeBadge}
+          ${unmergeBtn}
         </div>
-        <div class="mission-pages">${pageChips}</div>
-        <div class="actions">${actionsHtml}</div>
-      </div>
-      <div class="mission-meta">
-        <div class="mission-page-count">${tabCount}</div>
-        <div class="mission-page-label">tabs</div>
+        <div class="mission-pages">
+          ${pageChips}
+          <div class="drop-zone-hint">Drop tab here</div>
+        </div>
+        ${actionsHtml ? `<div class="actions">${actionsHtml}</div>` : ''}
       </div>
     </div>`;
 }
@@ -1025,9 +1761,13 @@ function renderArchiveItem(item) {
 async function renderStaticDashboard() {
   // --- Header ---
   const greetingEl = document.getElementById('greeting');
+  const subEl      = document.getElementById('greetingSub');
   const dateEl     = document.getElementById('dateDisplay');
   if (greetingEl) greetingEl.textContent = getGreeting();
+  if (subEl)      subEl.textContent      = getGreetingSub();
   if (dateEl)     dateEl.textContent     = getDateDisplay();
+  initWeather();         // async, updates #weatherLine when ready
+  initVillagerDancer();  // footer GIF cycle + hover dialogue
 
   // --- Fetch tabs ---
   await fetchOpenTabs();
@@ -1145,6 +1885,9 @@ async function renderStaticDashboard() {
     return b.tabs.length - a.tabs.length;
   });
 
+  // --- Apply drag-drop customizations (tab reassignments + group merges) ---
+  await applyDragCustomizations(domainGroups);
+
   // --- Render domain cards ---
   const openTabsSection      = document.getElementById('openTabsSection');
   const openTabsMissionsEl   = document.getElementById('openTabsMissions');
@@ -1153,7 +1896,7 @@ async function renderStaticDashboard() {
 
   if (domainGroups.length > 0 && openTabsSection) {
     if (openTabsSectionTitle) openTabsSectionTitle.textContent = 'Open tabs';
-    openTabsSectionCount.innerHTML = `${domainGroups.length} domain${domainGroups.length !== 1 ? 's' : ''} &nbsp;&middot;&nbsp; <button class="action-btn close-tabs" data-action="close-all-open-tabs" style="font-size:11px;padding:3px 10px;">${ICONS.close} Close all ${realTabs.length} tabs</button>`;
+    openTabsSectionCount.innerHTML = `${domainGroups.length} domain${domainGroups.length !== 1 ? 's' : ''} &nbsp;&middot;&nbsp; ${realTabs.length} tab${realTabs.length !== 1 ? 's' : ''}`;
     openTabsMissionsEl.innerHTML = domainGroups.map(g => renderDomainCard(g)).join('');
     openTabsSection.style.display = 'block';
   } else if (openTabsSection) {
@@ -1169,6 +1912,9 @@ async function renderStaticDashboard() {
 
   // --- Render "Saved for Later" column ---
   await renderDeferredColumn();
+
+  // --- Render Focus / Eisenhower matrix ---
+  await renderMatrixColumn();
 }
 
 async function renderDashboard() {
@@ -1190,6 +1936,41 @@ document.addEventListener('click', async (e) => {
   if (!actionEl) return;
 
   const action = actionEl.dataset.action;
+
+  // ---- Matrix: select quadrant pill ----
+  if (action === 'select-matrix-q') {
+    document.querySelectorAll('#matrixQPills .q-pill').forEach(p => p.classList.remove('active'));
+    actionEl.classList.add('active');
+    return;
+  }
+
+  // ---- Matrix: toggle task done (whole row is the target) ----
+  if (action === 'toggle-matrix-task') {
+    await toggleMatrixTask(actionEl.dataset.taskId);
+    return;
+  }
+
+  // ---- Matrix: delete task (stop propagation so row-toggle doesn't fire) ----
+  if (action === 'delete-matrix-task') {
+    e.stopPropagation();
+    await deleteMatrixTask(actionEl.dataset.taskId);
+    return;
+  }
+
+  // ---- @ mention: insert selected suggestion ----
+  if (action === 'insert-at-mention') {
+    e.stopPropagation();
+    insertAtMention(actionEl.dataset.atLabel);
+    return;
+  }
+
+  // ---- Unmerge a merged group ----
+  if (action === 'unmerge-group') {
+    e.stopPropagation();
+    await unmergeGroup(actionEl.dataset.mergeId);
+    await renderDashboard();
+    return;
+  }
 
   // ---- Close duplicate Tab Out tabs ----
   if (action === 'close-tabout-dupes') {
@@ -1407,8 +2188,7 @@ document.addEventListener('click', async (e) => {
           setTimeout(() => badge.remove(), 200);
         }
       });
-      card.classList.remove('has-amber-bar');
-      card.classList.add('has-neutral-bar');
+      // Revert border to neutral (category color stays from inline style)
     }
 
     showToast('Closed duplicates, kept one copy each');
@@ -1475,6 +2255,161 @@ document.addEventListener('input', async (e) => {
       || '<div style="font-size:12px;color:var(--muted);padding:8px 0">No results</div>';
   } catch (err) {
     console.warn('[tab-out] Archive search failed:', err);
+  }
+});
+
+
+/* ================================================================
+   DRAG-AND-DROP EVENT HANDLERS
+   ================================================================ */
+
+document.addEventListener('dragstart', e => {
+  const chip = e.target.closest('[data-drag-type="tab"]');
+  const grip = e.target.closest('[data-drag-type="group"]');
+
+  if (chip && !grip) {
+    // Dragging an individual tab chip
+    currentDrag = { type: 'tab', url: chip.dataset.dragUrl, fromDomain: chip.dataset.dragFrom };
+    e.dataTransfer.setData('text/plain', JSON.stringify(currentDrag));
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => chip.classList.add('drag-source'), 0);
+    _showDragHint('Drop onto a group to move this tab, hm~');
+  } else if (grip) {
+    // Dragging a group card via its grip handle
+    currentDrag = { type: 'group', domain: grip.dataset.dragDomain };
+    e.dataTransfer.setData('text/plain', JSON.stringify(currentDrag));
+    e.dataTransfer.effectAllowed = 'move';
+    const card = grip.closest('.mission-card');
+    setTimeout(() => card?.classList.add('drag-source'), 0);
+    _showDragHint('Drop onto another group to merge them, yes yes!');
+  }
+});
+
+document.addEventListener('dragover', e => {
+  if (!currentDrag) return;
+  const card = e.target.closest('.mission-card');
+  if (!card) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+
+  // New target card entered
+  if (card !== dragOverCard) {
+    _clearDragOverCard();
+    dragOverCard = card;
+    const targetDomain = card.dataset.dragDomain;
+
+    if (currentDrag.type === 'tab' && targetDomain !== currentDrag.fromDomain) {
+      card.classList.add('drop-target');
+    } else if (currentDrag.type === 'group' && targetDomain && targetDomain !== currentDrag.domain) {
+      card.classList.add('merge-target');
+      // After 500ms shake the target to signal "release to merge"
+      mergeTimer = setTimeout(() => {
+        if (dragOverCard === card) {
+          card.classList.add('merge-shake');
+          card.addEventListener('animationend', () => card.classList.remove('merge-shake'), { once: true });
+        }
+      }, 500);
+    }
+  }
+});
+
+document.addEventListener('dragleave', e => {
+  if (!dragOverCard) return;
+  // Only clear when leaving the card entirely, not just entering a child
+  const related = e.relatedTarget;
+  if (related && dragOverCard.contains(related)) return;
+  _clearDragOverCard();
+});
+
+document.addEventListener('drop', async e => {
+  e.preventDefault();
+  if (!currentDrag || !dragOverCard) { _clearDragState(); return; }
+  const targetDomain = dragOverCard.dataset.dragDomain;
+
+  if (currentDrag.type === 'tab') {
+    if (targetDomain && targetDomain !== currentDrag.fromDomain && currentDrag.url) {
+      await reassignTab(currentDrag.url, targetDomain);
+      showToast('Tab moved!');
+    }
+  } else if (currentDrag.type === 'group') {
+    if (targetDomain && targetDomain !== currentDrag.domain) {
+      await mergeGroupDomains(currentDrag.domain, targetDomain);
+      showToast('Groups merged!');
+    }
+  }
+
+  _clearDragState();
+  await renderDashboard();
+});
+
+document.addEventListener('dragend', () => {
+  _clearDragState();
+});
+
+// ---- Matrix input: live @ mention trigger ----
+document.addEventListener('input', (e) => {
+  const input = e.target.closest('#matrixInput');
+  if (!input) return;
+  showAtMentionDropdown(input);
+  // Show/hide the "enter to add" hint based on whether the input has content
+  const hint = input.closest('.matrix-input-wrap')?.querySelector('.matrix-input-hint');
+  if (hint) hint.style.opacity = input.value.length ? '0' : '';
+});
+
+// Close @ dropdown when clicking anywhere outside it
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#atMentionDropdown') && !e.target.closest('#matrixInput')) {
+    hideAtMentionDropdown();
+  }
+});
+
+// ---- Matrix: keyboard in input ----
+document.addEventListener('keydown', async (e) => {
+  const input = e.target.closest('#matrixInput');
+  if (!input) return;
+
+  const dropdown = document.getElementById('atMentionDropdown');
+  const dropOpen = dropdown && dropdown.style.display !== 'none';
+
+  // Escape closes dropdown
+  if (e.key === 'Escape' && dropOpen) {
+    e.preventDefault();
+    hideAtMentionDropdown();
+    return;
+  }
+
+  // Arrow keys navigate dropdown items
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && dropOpen) {
+    e.preventDefault();
+    const items = [...dropdown.querySelectorAll('.at-mention-item')];
+    const focused = document.activeElement;
+    let idx = items.indexOf(focused);
+    idx = e.key === 'ArrowDown' ? Math.min(idx + 1, items.length - 1) : Math.max(idx - 1, 0);
+    items[idx]?.focus();
+    return;
+  }
+
+  // Enter: select focused dropdown item OR add task
+  if (e.key === 'Enter') {
+    if (dropOpen && document.activeElement?.dataset.action === 'insert-at-mention') {
+      e.preventDefault();
+      insertAtMention(document.activeElement.dataset.atLabel);
+      return;
+    }
+    if (dropOpen) {
+      // Pick first item
+      e.preventDefault();
+      const first = dropdown.querySelector('.at-mention-item');
+      if (first) { insertAtMention(first.dataset.atLabel); return; }
+    }
+    const activePill = document.querySelector('#matrixQPills .q-pill.active');
+    const quadrant   = activePill ? activePill.dataset.q : 'do';
+    await addMatrixTask(input.value, quadrant);
+    input.value = '';
+    hideAtMentionDropdown();
+    // Restore hint opacity
+    const hint = input.closest('.matrix-input-wrap')?.querySelector('.matrix-input-hint');
+    if (hint) hint.style.opacity = '';
   }
 });
 

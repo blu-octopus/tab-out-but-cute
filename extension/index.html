@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tab Out</title>
 
-  <!-- Google Fonts: Nunito + M PLUS Rounded 1c ¡X Animal Crossing-style rounded letterforms -->
+  <!-- Google Fonts: Nunito + M PLUS Rounded 1c  - Animal Crossing-style rounded letterforms -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -22,10 +22,13 @@
        ================================================================ -->
   <header>
     <div class="header-left">
-      <!-- "Good afternoon" ¡X written by getGreeting() in app.js -->
       <h1 id="greeting"></h1>
-      <!-- "Friday, April 4, 2026" ¡X written by getDateDisplay() in app.js -->
+      <div class="greeting-sub" id="greetingSub"></div>
       <div class="date" id="dateDisplay"></div>
+      <div class="weather-line" id="weatherLine" style="display:none"></div>
+    </div>
+    <div class="header-right">
+      <img class="tom-nook-header" src="assets/tom-nook-head-emoji.gif" alt="Tom Nook" aria-hidden="true">
     </div>
     <span class="header-leaf" aria-hidden="true">
       <svg viewBox="0 0 24 24" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
@@ -70,7 +73,15 @@
       <div class="missions" id="openTabsMissions"></div>
     </div>
 
-    <!-- RIGHT COLUMN: Saved for Later checklist -->
+    <!-- RIGHT RAIL: Focus matrix + Saved for later -->
+    <div class="right-rail">
+
+    <!-- FOCUS / EISENHOWER MATRIX -->
+    <div class="matrix-column" id="matrixColumn">
+      <!-- rendered by renderMatrixColumn() in app.js -->
+    </div>
+
+    <!-- SAVED FOR LATER checklist -->
     <div class="deferred-column" id="deferredColumn" style="display:none">
       <div class="section-header">
         <h2>Saved for later</h2>
@@ -105,6 +116,8 @@
       </div>
     </div>
 
+    </div><!-- end .right-rail -->
+
   </div><!-- end .dashboard-columns -->
 
   <!-- ================================================================
@@ -117,12 +130,30 @@
         <div class="stat-label">Open tabs</div>
       </div>
     </div>
-    <div class="last-refresh">
-      <span style="color: var(--muted); font-size: 11px;"><a href="https://github.com/zarazhangrui/tab-out" target="_top" style="color: var(--muted); text-decoration: underline; text-underline-offset: 2px;">Tab Out</a> by <a href="https://x.com/zarazhangrui" target="_top" style="color: var(--muted); text-decoration: underline; text-underline-offset: 2px;">Zara</a></span>
-    </div>
+    <div class="last-refresh" id="lastRefresh"></div>
   </footer>
 
+  <!-- Capybaras swimming in the ocean footer -->
+  <!-- Villager dancer cycles through GIFs in assets/villager dancing/ -->
+  <div class="villager-footer" id="villagerFooter">
+    <div class="villager-bubble" id="villagerBubble"></div>
+    <img class="villager-dancer" id="villagerDancer" src="" alt="" aria-hidden="true">
+  </div>
+
+  <!-- Credits overlaid on the ocean wave -->
+  <div class="footer-credits" aria-label="Credits">
+    <a href="https://github.com/zarazhangrui/tab-out" target="_top">Tab Out</a>
+    <span>by</span>
+    <a href="https://x.com/zarazhangrui" target="_top">Zara</a>
+    <span class="footer-credits-sep">&middot;</span>
+    <span>Animal Crossing UI by</span>
+    <a href="https://github.com/guokaigdg" target="_top">guokaigdg</a>
+  </div>
+
 </div><!-- end .container -->
+
+<!-- Drag hint  - floats above everything during drag interactions -->
+<div class="drag-hint" id="dragHint" aria-live="polite"></div>
 
 <!-- ================================================================
      TOAST ??? floats above everything, used for action confirmations

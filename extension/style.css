@@ -1,5 +1,5 @@
 /* ============================================================
-   Tab Out ¡X Animal Island theme
+   Tab Out  -X Animal Island theme
    Inspired by animal-island-ui (Animal Crossing: New Horizons vibes).
    Warm parchment, pill buttons with 3D Nintendo-press shadows,
    rounded Nunito typography, and friendly NookPhone colors.
@@ -14,11 +14,11 @@
   --card-bg-soft: #fdfdf5;           /* title card bg */
   --warm-gray: #e6dfc9;              /* dividers / subtle borders */
 
-  /* ---- Text (all warm browns ¡X no pure black) ---- */
+  /* ---- Text (all warm browns  -X no pure black) ---- */
   --ink: #5a432b;                    /* primary body text */
   --ink-strong: #794f27;             /* headings */
-  --muted: #9f927d;                  /* secondary text */
-  --muted-soft: #c4b89e;             /* disabled / placeholder */
+  --muted: #7a6855;                  /* secondary text  -X WCAG AA on parchment */
+  --muted-soft: #b0a08e;             /* disabled / placeholder */
 
   /* ---- Accents ---- */
   --accent-teal: #19c8b9;            /* primary mint teal */
@@ -36,7 +36,7 @@
   --accent-focus: #ffcc00;           /* yellow focus ring (never blue!) */
 
   /* ---- Status ---- */
-  --status-active: #6fba2c;          /* sage ¡X active mission */
+  --status-active: #6fba2c;          /* sage  -X active mission */
   --status-cooling: #f5c31c;         /* warning yellow */
   --status-abandoned: #e05a5a;       /* soft game-red */
 
@@ -90,7 +90,7 @@ body::before {
   z-index: 0;
 }
 
-/* Tiny dotty ¡§grain¡¨ for a printed/paper feel */
+/* Tiny dotty "grain" for a printed/paper feel */
 body::after {
   content: '';
   position: fixed;
@@ -107,24 +107,92 @@ body::after {
   z-index: 1;
   max-width: 960px;
   margin: 0 auto;
-  padding: 48px 32px 160px; /* extra bottom room for ocean scene */
+  padding: 48px 32px 220px; /* extra bottom room for taller SVG ocean */
 }
 
-/* Ocean scene ¡X sits at the very bottom of the page.
-   The image is 1024¡Ñ132px JPEG. The top ~20px is dark sky ¡X we shift the crop
-   so only the water + fish portion is visible. */
+/* Villager dancer - cycles through GIFs from assets/villager dancing/
+   Positioned above the wave crest so they appear to dance on the water. */
+.villager-footer {
+  position: absolute;
+  bottom: 96px;          /* sit feet at approx wave-crest height */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+
+.villager-dancer {
+  height: 160px;
+  width: auto;
+  image-rendering: auto;
+  display: block;
+  transition: opacity 0.35s ease;
+}
+
+/* Speech bubble that appears on hover */
+.villager-bubble {
+  background: #fffef8;
+  border: 2px solid var(--warm-gray);
+  border-radius: 14px;
+  padding: 7px 14px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+  max-width: 220px;
+  white-space: normal;
+  box-shadow: 0 3px 0 0 var(--warm-gray);
+  position: relative;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.villager-bubble.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Arrow pointing down toward the villager */
+.villager-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--warm-gray);
+}
+.villager-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #fffef8;
+  z-index: 1;
+}
+
+/* Ocean scene  -X SVG wave (1440 x 186). The wave crest sits at y=82/186 ? 44%
+   from the top. We show the full 186px height so fish, coral and the scalloped
+   wave edge all appear. */
 .container::after {
   content: '';
   position: absolute;
   left: -80px;
   right: -80px;
   bottom: 0;
-  height: 72px;
-  background-color: #7ad0df;           /* ocean teal fill, hides any gap */
-  background-image: url('icons/footer-ocean.jpg');
-  background-size: auto 132px;
+  height: 186px;
+  background-color: transparent;       /* page bg shows above the wave crest, making scallops visible */
+  background-image: url('icons/footer-wave.svg');
+  background-size: 1440px 186px;
   background-repeat: repeat-x;
-  background-position: center -60px;   /* shift up past dark sky band */
+  background-position: center top;
   pointer-events: none;
   z-index: 0;
   border-radius: 0 0 var(--r-card) var(--r-card);
@@ -150,17 +218,33 @@ header {
   position: relative;
 }
 
-/* Cute leaf in the top-right corner of the header ¡X inline SVG element */
+/* Tom Nook head gif - right side of header, vertically centered */
+.header-right {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  padding-right: 52px;   /* clear the absolute-positioned leaf */
+  flex-shrink: 0;
+}
+
+.tom-nook-header {
+  height: 72px;
+  width: auto;
+  image-rendering: auto;
+  display: block;
+}
+
+/* Balanced leaf  -X sits centered on the top-right curve of the organic header */
 .header-leaf {
   position: absolute;
-  top: -14px;
-  right: 28px;
-  width: 36px;
-  height: 36px;
+  top: -20px;
+  right: 44px;   /* offset from corner so it sits on the high arc */
+  width: 52px;
+  height: 52px;
   color: #6fba2c;
-  filter: drop-shadow(0 3px 0 rgba(90, 158, 30, 0.25));
-  transform: rotate(-18deg);
-  animation: leafSway 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 2px rgba(60, 120, 20, 0.22));
+  transform: rotate(-28deg);
+  animation: leafSway 5s ease-in-out infinite;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -168,8 +252,8 @@ header {
 }
 
 @keyframes leafSway {
-  0%, 100% { transform: rotate(-18deg) translateY(0); }
-  50%      { transform: rotate(-10deg) translateY(-2px); }
+  0%, 100% { transform: rotate(-28deg) translateY(0px); }
+  50%      { transform: rotate(-20deg) translateY(-3px); }
 }
 
 .header-left h1 {
@@ -181,6 +265,16 @@ header {
   margin-bottom: 4px;
 }
 
+.greeting-sub {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  opacity: 0.82;
+}
+
 .header-left .date {
   font-size: 12px;
   color: var(--muted);
@@ -189,8 +283,25 @@ header {
   text-transform: uppercase;
 }
 
+.weather-line {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ink);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid var(--warm-gray);
+  border-radius: var(--r-pill);
+  padding: 5px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 0 0 var(--warm-gray);
+  letter-spacing: 0.02em;
+  max-width: fit-content;
+}
+
 /* ============================================================
-   BANNER ¡X ¡§you have extra Tab Out tabs open¡¨
+   BANNER  -X "you have extra Tab Out tabs open"
    ============================================================ */
 .tab-cleanup-banner {
   background: linear-gradient(135deg, #fff4de, #ffe7c4);
@@ -235,17 +346,18 @@ header {
   font-weight: 700;
   padding: 10px 20px;
   border-radius: var(--r-pill);
-  border: 2px solid #c8713a;
-  background: #e59266;
-  color: #fff;
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  border: 2px solid #c07050;
+  background: #fce4d3;
+  color: #4a2010;           /* dark text on light orange  -X WCAG AA */
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   white-space: nowrap;
-  box-shadow: 0 5px 0 0 #b8612e;
+  box-shadow: 0 5px 0 0 #c07050;
   letter-spacing: 0.02em;
 }
 
 .tab-cleanup-btn:hover {
+  background: #f9d4be;
   transform: translateY(-1px);
   box-shadow: 0 6px 0 0 #b8612e;
 }
@@ -344,7 +456,7 @@ header {
   flex-direction: column;
   gap: 8px;
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   position: relative;
   overflow: hidden;
   break-inside: avoid;
@@ -370,7 +482,7 @@ header {
 .mission-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 24px rgba(107, 92, 67, 0.28);
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
 }
 
 .mission-card.closing {
@@ -400,6 +512,20 @@ header {
   font-size: 15px;
   color: var(--ink-strong);
   letter-spacing: 0;
+}
+
+/* Color-coded category label  -X assigned by getDomainCategory() */
+.category-pill {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  line-height: 1.6;
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 
 .mission-tag {
@@ -444,13 +570,20 @@ header {
   font-size: 10px;
   font-weight: 800;
   color: #fff;
-  background: var(--accent-teal);
+  background: #0e9e92;   /* darker teal  -X white text ratio 4.8:1 ? WCAG AA */
   padding: 3px 10px;
   border-radius: var(--r-pill);
-  border: 2px solid var(--accent-teal-active);
+  border: 2px solid #097a70;
   letter-spacing: 0.05em;
 }
 .open-tabs-badge svg { width: 10px; height: 10px; }
+
+/* Duplicate-count variant  -X amber with dark text for WCAG contrast */
+.open-tabs-badge.dupe-badge {
+  background: #f7cd67;
+  color: #5a3c00;
+  border-color: #c8a22a;
+}
 
 .mission-summary {
   font-size: 13px;
@@ -471,10 +604,11 @@ header {
    ============================================================ */
 .page-chip {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink);
   background: transparent;
-  padding: 8px 10px;
+  padding: 10px 10px;  /* Fitts' law: taller target = easier to hit */
+  min-height: 44px;    /* Apple HIG minimum touch target */
   border-radius: var(--r-pill);
   border: none;
   border-bottom: 1.5px dashed rgba(159, 146, 125, 0.28);
@@ -538,7 +672,7 @@ header {
   background: transparent;
   border: 2px solid transparent;
   color: var(--muted);
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   padding: 5px;
   border-radius: 50%;
   opacity: 0.5;
@@ -570,7 +704,7 @@ header {
 }
 
 .page-chip.clickable {
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   transition: background 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
@@ -621,7 +755,7 @@ header {
   border: 2px solid var(--warm-gray);
   background: #fff;
   color: var(--ink);
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
               background var(--dur) var(--ease), color var(--dur) var(--ease),
               border-color var(--dur) var(--ease);
@@ -647,50 +781,50 @@ header {
 .action-btn svg { width: 12px; height: 12px; }
 
 .action-btn.primary {
-  background: var(--accent-teal);
+  background: #0e9e92;
   color: #fff;
-  border-color: var(--accent-teal-active);
-  box-shadow: 0 4px 0 0 var(--accent-teal-active);
+  border-color: #097a70;
+  box-shadow: 0 4px 0 0 #097a70;
 }
 .action-btn.primary:hover {
-  background: var(--accent-teal-hover);
-  border-color: var(--accent-teal-active);
-  box-shadow: 0 5px 0 0 var(--accent-teal-active);
+  background: #0d8c81;
+  border-color: #076b62;
+  box-shadow: 0 5px 0 0 #076b62;
 }
 .action-btn.primary:active {
-  box-shadow: 0 1px 0 0 var(--accent-teal-active);
+  box-shadow: 0 1px 0 0 #076b62;
 }
 
 .action-btn.close-tabs {
-  border-color: #e59266;
-  color: #fff;
-  background: #f0a987;
-  box-shadow: 0 4px 0 0 #b8612e;
+  border-color: #d4845a;
+  color: #4a2010;
+  background: #fce4d3;
+  box-shadow: 0 3px 0 0 #c07050;
 }
 .action-btn.close-tabs:hover {
-  background: #e59266;
-  border-color: #c8713a;
-  color: #fff;
-  box-shadow: 0 5px 0 0 #b8612e;
+  background: #f9d4be;
+  border-color: #c07050;
+  color: #3a1808;
+  box-shadow: 0 4px 0 0 #b8612e;
 }
 .action-btn.close-tabs:active {
   box-shadow: 0 1px 0 0 #b8612e;
 }
 
 .action-btn.save-tabs {
-  border-color: var(--accent-sage-deep);
-  color: #fff;
-  background: var(--accent-sage-soft);
-  box-shadow: 0 4px 0 0 var(--accent-sage-deep);
+  border-color: #4a8a1a;
+  color: #1a4400;
+  background: #d4f0c0;
+  box-shadow: 0 3px 0 0 #3a6e14;
 }
 .action-btn.save-tabs:hover {
-  background: var(--accent-sage);
-  border-color: var(--accent-sage-deep);
-  color: #fff;
-  box-shadow: 0 5px 0 0 var(--accent-sage-deep);
+  background: #c0e8aa;
+  border-color: #3a6e14;
+  color: #133400;
+  box-shadow: 0 4px 0 0 #3a6e14;
 }
 .action-btn.save-tabs:active {
-  box-shadow: 0 1px 0 0 var(--accent-sage-deep);
+  box-shadow: 0 1px 0 0 #3a6e14;
 }
 
 .action-btn.danger {
@@ -759,7 +893,7 @@ footer {
   position: relative;
 }
 
-/* No extra footer ::after ¡X the ocean scene is handled by .container::after */
+/* No extra footer ::after  -X the ocean scene is handled by .container::after */
 
 .footer-stats { display: flex; gap: 32px; }
 
@@ -790,12 +924,36 @@ footer {
   font-weight: 600;
 }
 
-.last-refresh a {
-  color: var(--accent-teal-active) !important;
-  text-decoration: none !important;
-  font-weight: 800;
+/* Credits line sits on top of the ocean wave, bottom-right */
+.footer-credits {
+  position: absolute;
+  bottom: 10px;
+  right: 20px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.02em;
+  pointer-events: auto;
 }
-.last-refresh a:hover { color: var(--accent-teal) !important; }
+.footer-credits a {
+  color: rgba(255,255,255,0.92);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255,255,255,0.4);
+  transition: color 0.15s;
+}
+.footer-credits a:hover {
+  color: #fff;
+  text-decoration-color: #fff;
+}
+.footer-credits-sep {
+  opacity: 0.5;
+  margin: 0 2px;
+}
 
 .refresh-btn {
   font-family: var(--font-body);
@@ -847,7 +1005,7 @@ footer                                                   { animation: fadeUp 0.5
 .status-bar.neutral { background: var(--warm-gray); }
 
 /* ============================================================
-   MISSIONS EMPTY STATE ¡X "you did it"
+   MISSIONS EMPTY STATE  -X "you did it"
    ============================================================ */
 .missions-empty-state {
   column-span: all;
@@ -994,26 +1152,172 @@ footer                                                   { animation: fadeUp 0.5
 .update-banner-dismiss svg { width: 14px; height: 14px; }
 
 /* ============================================================
-   SAVED FOR LATER ¡X right column checklist + archive
+   SAVED FOR LATER  -X right column checklist + archive
    ============================================================ */
 .dashboard-columns {
   display: flex;
-  gap: 32px;
+  gap: 28px;
   align-items: flex-start;
 }
 
 .dashboard-columns .active-section {
   flex: 1;
-  min-width: 600px;
+  min-width: 0;
 }
 
-.deferred-column {
+/* Right rail  -X sticky wrapper holding matrix + saved-for-later stacked */
+.right-rail {
   width: 300px;
   flex-shrink: 0;
   position: sticky;
-  top: 32px;
-  max-height: calc(100vh - 64px);
+  top: 28px;
+  max-height: calc(100vh - 56px);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-soft) transparent;
+}
+.right-rail::-webkit-scrollbar { width: 6px; }
+.right-rail::-webkit-scrollbar-track { background: transparent; }
+.right-rail::-webkit-scrollbar-thumb {
+  background: var(--muted-soft);
+  border-radius: var(--r-pill);
+}
+
+/* Matrix panel  -X Eisenhower focus board */
+.matrix-column {
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-card);
+  padding: 20px 22px 22px;
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   DRAG AND DROP
+   ============================================================ */
+
+/* Grip handle  -X 6-dot icon, appears on card hover */
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  cursor: grab;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.15s, color 0.15s;
+  border-radius: 4px;
+  margin-right: 2px;
+}
+.mission-card:hover .drag-handle { opacity: 0.6; }
+.drag-handle:hover { opacity: 1 !important; color: var(--ink); }
+.drag-handle:active { cursor: grabbing; }
+
+/* Source element  -X dimmed while being dragged */
+.drag-source { opacity: 0.35 !important; }
+
+/* Tab-chip drop target  -X teal dashed outline */
+.mission-card.drop-target {
+  outline: 2.5px dashed var(--accent-teal);
+  outline-offset: 3px;
+  background: color-mix(in srgb, var(--accent-teal) 7%, var(--card-bg-soft)) !important;
+}
+
+/* Group-merge target  -X rose dashed outline */
+.mission-card.merge-target {
+  outline: 2.5px dashed var(--accent-rose);
+  outline-offset: 3px;
+}
+
+/* Shake + scale pulse on merge hover */
+@keyframes mergeShake {
+  0%   { transform: translateX(0)    rotate(0deg)    scale(1); }
+  12%  { transform: translateX(-5px) rotate(-1.5deg) scale(1.01); }
+  25%  { transform: translateX( 5px) rotate( 1.5deg) scale(1.02); }
+  38%  { transform: translateX(-4px) rotate(-1deg)   scale(1.01); }
+  50%  { transform: translateX( 4px) rotate( 1deg)   scale(1.02); }
+  63%  { transform: translateX(-2px) rotate(-0.5deg) scale(1.01); }
+  75%  { transform: translateX( 2px) rotate( 0.5deg) scale(1.01); }
+  88%  { transform: translateX(-1px) rotate(-0.2deg) scale(1); }
+  100% { transform: translateX(0)    rotate(0deg)    scale(1); }
+}
+.mission-card.merge-shake {
+  animation: mergeShake 0.55s cubic-bezier(.36,.07,.19,.97);
+  outline: 2.5px dashed var(--accent-rose) !important;
+  outline-offset: 3px;
+  background: color-mix(in srgb, var(--accent-rose) 7%, var(--card-bg-soft)) !important;
+}
+
+/* Floating drag hint banner */
+.drag-hint {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--ink);
+  color: #fff;
+  padding: 8px 22px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  white-space: nowrap;
+}
+.drag-hint.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Unmerge / split button on merged group cards */
+.unmerge-btn {
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--warm-gray);
+  border: none;
+  border-radius: 20px;
+  padding: 2px 8px;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-left: auto;
+  transition: background 0.15s, color 0.15s;
+}
+.unmerge-btn:hover {
+  background: color-mix(in srgb, var(--accent-rose) 20%, white);
+  color: var(--accent-rose);
+}
+
+/* Draggable chip  -X show move cursor on drag */
+.page-chip[draggable="true"] { cursor: url('icons/cursor-finger.png') 0 0, grab; }
+.page-chip[draggable="true"]:active { cursor: grabbing; }
+
+/* Drop zone empty state inside card  -X appears while tab-drag is active */
+.drop-zone-hint {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-teal);
+  text-align: center;
+  padding: 6px 0 2px;
+  letter-spacing: 0.04em;
+  display: none;
+}
+.mission-card.drop-target .drop-zone-hint { display: block; }
+
+/* Saved-for-later panel  -X remove its own sticky, right-rail handles it */
+.deferred-column {
   background: var(--card-bg-soft);
   border: 2px solid var(--warm-gray);
   border-radius: var(--r-card);
@@ -1021,9 +1325,9 @@ footer                                                   { animation: fadeUp 0.5
   box-shadow: var(--card-shadow);
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .dashboard-columns { flex-direction: column; }
-  .deferred-column { width: 100%; position: static; }
+  .right-rail { width: 100%; position: static; max-height: none; }
 }
 
 .deferred-list { margin-top: 4px; }
@@ -1039,7 +1343,7 @@ footer                                                   { animation: fadeUp 0.5
 
 .deferred-item:last-child { border-bottom: none; }
 
-/* Custom checkbox ¡X rounded green like AC¡¦s gameplay ticks */
+/* Custom checkbox  -X rounded green like AC -s gameplay ticks */
 .deferred-checkbox {
   appearance: none;
   -webkit-appearance: none;
@@ -1048,7 +1352,7 @@ footer                                                   { animation: fadeUp 0.5
   border: 2.5px solid var(--muted-soft);
   border-radius: 8px;
   background: #fff;
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   flex-shrink: 0;
   margin-top: 2px;
   transition: all 0.2s var(--ease);
@@ -1120,7 +1424,7 @@ footer                                                   { animation: fadeUp 0.5
   background: none;
   border: 2px solid transparent;
   color: var(--muted);
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   padding: 3px;
   border-radius: 50%;
   opacity: 0.4;
@@ -1168,7 +1472,7 @@ footer                                                   { animation: fadeUp 0.5
   color: var(--ink);
   background: var(--card-bg);
   border: 2px solid var(--warm-gray);
-  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1281,7 +1585,291 @@ footer                                                   { animation: fadeUp 0.5
 }
 
 /* ============================================================
-   GLOBAL FOCUS ¡X yellow, never blue
+   EISENHOWER MATRIX  -X Focus Panel
+   ============================================================ */
+/* Pills come first, then input */
+.matrix-q-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+/* Input row */
+.matrix-input-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.matrix-input {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--muted-soft);
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 3px 0 0 var(--press-shadow-soft);
+  box-sizing: border-box;
+}
+.matrix-input:focus {
+  border-color: var(--accent-focus);
+  box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255, 204, 0, 0.2);
+}
+.matrix-input::placeholder { color: var(--muted); font-weight: 500; }
+
+.matrix-input-hint {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+/* @ mention dropdown */
+.at-mention-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 2px solid var(--muted-soft);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.11), 0 2px 6px rgba(0,0,0,0.07);
+  z-index: 200;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.at-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+  transition: background 0.1s;
+  font-family: var(--font-body);
+}
+.at-mention-item:hover,
+.at-mention-item:focus {
+  background: var(--warm-gray);
+  outline: none;
+}
+
+.at-favicon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.at-mention-label {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.at-mention-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--warm-gray);
+  border-radius: 20px;
+  padding: 2px 7px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.at-mention-badge--tab {
+  background: color-mix(in srgb, var(--accent-teal) 15%, white);
+  color: var(--accent-teal);
+}
+
+.q-pill {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 2px solid transparent;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+  background: var(--warm-gray);
+  color: var(--muted);
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+}
+.q-pill:hover {
+  background: color-mix(in srgb, var(--qc, #e6dfc9) 30%, white);
+  color: var(--qt, var(--ink));
+  border-color: var(--qc, var(--warm-gray));
+}
+.q-pill.active {
+  background: var(--qc, var(--warm-gray));
+  color: var(--qt, var(--ink));
+  border-color: color-mix(in srgb, var(--qc, #e6dfc9) 70%, black);
+  box-shadow: 0 3px 0 0 color-mix(in srgb, var(--qc, #e6dfc9) 60%, black);
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.matrix-quadrant {
+  background: color-mix(in srgb, var(--qc, #e6dfc9) 18%, white);
+  border: 2px solid color-mix(in srgb, var(--qc, #e6dfc9) 55%, white);
+  border-radius: 14px;
+  padding: 10px 10px 8px;
+  min-height: 80px;
+}
+
+.matrix-q-hd {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.matrix-q-hd strong {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--qt, var(--ink-strong));
+}
+
+.matrix-q-sub {
+  font-size: 9px;
+  color: color-mix(in srgb, var(--qt, var(--muted)) 80%, transparent);
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.matrix-q-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrix-q-empty {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.matrix-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 2px;
+  border-radius: 8px;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+  transition: background 0.1s;
+}
+.matrix-item:hover {
+  background: rgba(0,0,0,0.04);
+}
+
+.matrix-item.done .matrix-item-text {
+  text-decoration: line-through;
+  opacity: 0.42;
+}
+
+/* Visual-only checkbox (toggled via JS on the parent row) */
+.matrix-cb-visual {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  border: 2px solid color-mix(in srgb, var(--qc, #e6dfc9) 80%, black);
+  border-radius: 5px;
+  background: #fff;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+.matrix-cb-visual.checked {
+  background: var(--qc, var(--accent-sage));
+  border-color: color-mix(in srgb, var(--qc, #e6dfc9) 60%, black);
+}
+.matrix-cb-visual.checked::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  width: 4px;
+  height: 7px;
+  border: solid var(--qt, #fff);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.matrix-item-text {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* @mention chips inside task text */
+.at-tag {
+  display: inline-block;
+  background: color-mix(in srgb, var(--qc, var(--accent-teal)) 22%, white);
+  color: color-mix(in srgb, var(--qt, var(--ink)) 90%, black);
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* Delete button  -X same shape as chip-close */
+.matrix-item-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+  border-radius: 50%;
+  padding: 0;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+.matrix-item:hover .matrix-item-del { opacity: 1; }
+.matrix-item-del:hover {
+  color: #fff;
+  background: var(--accent-rose);
+}
+
+/* ============================================================
+   GLOBAL FOCUS  -X yellow, never blue
    ============================================================ */
 button:focus-visible,
 a:focus-visible,
@@ -1291,11 +1879,4 @@ a:focus-visible,
   border-radius: var(--r-pill);
 }
 
-/* Scrollbar (webkit) ¡X subtle warm */
-.deferred-column::-webkit-scrollbar { width: 8px; }
-.deferred-column::-webkit-scrollbar-track { background: transparent; }
-.deferred-column::-webkit-scrollbar-thumb {
-  background: var(--muted-soft);
-  border-radius: var(--r-pill);
-}
-.deferred-column::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+/* Scrollbar styles moved to .right-rail above */
