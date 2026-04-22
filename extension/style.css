@@ -1,43 +1,105 @@
 /* ============================================================
-   Tab Mission Control â€” Dashboard Styles
-   Extracted directly from mockup.html â€” do not modify unless
-   also updating the mockup. This is the approved design.
+   Tab Out ¡X Animal Island theme
+   Inspired by animal-island-ui (Animal Crossing: New Horizons vibes).
+   Warm parchment, pill buttons with 3D Nintendo-press shadows,
+   rounded Nunito typography, and friendly NookPhone colors.
+
+   Original selectors are preserved so app.js keeps working.
    ============================================================ */
 
 :root {
-  --ink: #1a1613;
-  --paper: #f8f5f0;
-  --warm-gray: #e8e2da;
-  --muted: #9a918a;
-  --accent-amber: #c8713a;
-  --accent-sage: #5a7a62;
-  --accent-slate: #5a6b7a;
-  --accent-rose: #b35a5a;
-  --status-active: #3d7a4a;
-  --status-cooling: #b8892e;
-  --status-abandoned: #b35a5a;
-  --card-bg: #fffdf9;
-  --shadow: rgba(26, 22, 19, 0.06);
+  /* ---- Canvas ---- */
+  --paper: #f8f8f0;                  /* warm parchment page bg */
+  --card-bg: rgb(247, 243, 223);     /* slightly warmer card bg */
+  --card-bg-soft: #fdfdf5;           /* title card bg */
+  --warm-gray: #e6dfc9;              /* dividers / subtle borders */
+
+  /* ---- Text (all warm browns ¡X no pure black) ---- */
+  --ink: #5a432b;                    /* primary body text */
+  --ink-strong: #794f27;             /* headings */
+  --muted: #9f927d;                  /* secondary text */
+  --muted-soft: #c4b89e;             /* disabled / placeholder */
+
+  /* ---- Accents ---- */
+  --accent-teal: #19c8b9;            /* primary mint teal */
+  --accent-teal-hover: #3dd4c6;
+  --accent-teal-active: #11a89b;
+  --accent-teal-soft: #e6f9f6;
+
+  --accent-amber: #e59266;           /* NookPhone orange (was amber) */
+  --accent-sage: #6fba2c;            /* leaf green */
+  --accent-sage-soft: #86d67a;
+  --accent-sage-deep: #5a9e1e;
+  --accent-rose: #fc736d;            /* NookPhone red */
+  --accent-sun: #f7cd67;              /* NookPhone yellow */
+  --accent-sky: #889df0;              /* NookPhone blue */
+  --accent-focus: #ffcc00;           /* yellow focus ring (never blue!) */
+
+  /* ---- Status ---- */
+  --status-active: #6fba2c;          /* sage ¡X active mission */
+  --status-cooling: #f5c31c;         /* warning yellow */
+  --status-abandoned: #e05a5a;       /* soft game-red */
+
+  /* ---- 3D shadow colors (Nintendo button-press) ---- */
+  --press-shadow: #bdaea0;           /* button bottom shadow */
+  --press-shadow-soft: #d4c9b4;      /* input bottom shadow */
+  --card-shadow: 0 4px 10px rgba(107, 92, 67, 0.22);
+  --card-shadow-hover: 0 10px 24px rgba(114, 93, 66, 0.22);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 0.25s;
+
+  /* ---- Shapes ---- */
+  --r-pill: 999px;                   /* buttons, inputs, chips */
+  --r-card: 20px;
+  --r-card-title: 40px 35px 45px 38px / 38px 45px 35px 40px; /* organic blob */
+  --r-sm: 12px;
+
+  /* ---- Fonts ---- */
+  --font-body: 'Nunito', 'M PLUS Rounded 1c', 'Zen Maru Gothic',
+               -apple-system, 'PingFang SC', BlinkMacSystemFont, sans-serif;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html, body { height: 100%; }
+
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.01em;
   background: var(--paper);
   color: var(--ink);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle paper texture */
+/* Soft sky + grass gradient behind everything, plus gentle parchment tint */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background:
+    radial-gradient(1200px 500px at 10% -10%, rgba(136, 157, 240, 0.18), transparent 60%),
+    radial-gradient(900px 400px at 110% 10%, rgba(25, 200, 185, 0.14), transparent 60%),
+    radial-gradient(1400px 520px at 50% 120%, rgba(125, 195, 149, 0.22), transparent 60%),
+    var(--paper);
   pointer-events: none;
   z-index: 0;
+}
+
+/* Tiny dotty ¡§grain¡¨ for a printed/paper feel */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(121, 79, 39, 0.06) 1px, transparent 1px);
+  background-size: 18px 18px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
 }
 
 .container {
@@ -45,245 +107,285 @@ body::before {
   z-index: 1;
   max-width: 960px;
   margin: 0 auto;
-  padding: 48px 32px 80px;
+  padding: 48px 32px 160px; /* extra bottom room for ocean scene */
 }
 
-/* When the saved-for-later sidebar is open, expand the container
-   so the tab grid still has room for 2-3 columns */
+/* Ocean scene ¡X sits at the very bottom of the page.
+   The image is 1024¡Ñ132px JPEG. The top ~20px is dark sky ¡X we shift the crop
+   so only the water + fish portion is visible. */
+.container::after {
+  content: '';
+  position: absolute;
+  left: -80px;
+  right: -80px;
+  bottom: 0;
+  height: 72px;
+  background-color: #7ad0df;           /* ocean teal fill, hides any gap */
+  background-image: url('icons/footer-ocean.jpg');
+  background-size: auto 132px;
+  background-repeat: repeat-x;
+  background-position: center -60px;   /* shift up past dark sky band */
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 0 0 var(--r-card) var(--r-card);
+}
+
 .container:has(.dashboard-columns) {
   max-width: 1300px;
 }
 
-/* ---- Header ---- */
+/* ============================================================
+   HEADER
+   ============================================================ */
 header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 48px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--warm-gray);
+  margin-bottom: 36px;
+  padding: 20px 28px;
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-card-title);
+  box-shadow: var(--card-shadow);
+  position: relative;
+}
+
+/* Cute leaf in the top-right corner of the header ¡X inline SVG element */
+.header-leaf {
+  position: absolute;
+  top: -14px;
+  right: 28px;
+  width: 36px;
+  height: 36px;
+  color: #6fba2c;
+  filter: drop-shadow(0 3px 0 rgba(90, 158, 30, 0.25));
+  transform: rotate(-18deg);
+  animation: leafSway 4s ease-in-out infinite;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+@keyframes leafSway {
+  0%, 100% { transform: rotate(-18deg) translateY(0); }
+  50%      { transform: rotate(-10deg) translateY(-2px); }
 }
 
 .header-left h1 {
-  font-family: 'Newsreader', serif;
-  font-weight: 300;
+  font-family: var(--font-body);
+  font-weight: 800;
   font-size: 28px;
-  letter-spacing: -0.5px;
-  color: var(--ink);
+  letter-spacing: -0.2px;
+  color: var(--ink-strong);
   margin-bottom: 4px;
 }
 
 .header-left .date {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--muted);
-  font-weight: 400;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
 }
 
-/* ---- Tab cleanup banner ---- */
+/* ============================================================
+   BANNER ¡X ¡§you have extra Tab Out tabs open¡¨
+   ============================================================ */
 .tab-cleanup-banner {
-  background: linear-gradient(135deg, rgba(200, 113, 58, 0.04), rgba(200, 113, 58, 0.09));
-  border: 1px solid rgba(200, 113, 58, 0.18);
-  border-radius: 8px;
-  padding: 16px 24px;
+  background: linear-gradient(135deg, #fff4de, #ffe7c4);
+  border: 2px solid #f1c27a;
+  border-radius: var(--r-card);
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 16px;
+  box-shadow: 0 4px 0 0 #e3b06a;
 }
 
 .tab-cleanup-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .tab-cleanup-icon {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: rgba(200, 113, 58, 0.1);
+  background: #fff;
+  border: 2px solid #f1c27a;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 3px 0 0 #e3b06a;
 }
 
-.tab-cleanup-icon svg {
-  width: 18px;
-  height: 18px;
-  color: var(--accent-amber);
-}
+.tab-cleanup-icon svg { width: 18px; height: 18px; color: #c8713a; }
 
-.tab-cleanup-text {
-  font-size: 13px;
-  color: var(--ink);
-  line-height: 1.5;
-}
-
-.tab-cleanup-text strong {
-  font-weight: 600;
-}
+.tab-cleanup-text { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.tab-cleanup-text strong { font-weight: 800; color: var(--ink-strong); }
 
 .tab-cleanup-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 8px 20px;
-  border-radius: 6px;
-  border: none;
-  background: var(--accent-amber);
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  border: 2px solid #c8713a;
+  background: #e59266;
+  color: #fff;
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   white-space: nowrap;
+  box-shadow: 0 5px 0 0 #b8612e;
+  letter-spacing: 0.02em;
 }
 
 .tab-cleanup-btn:hover {
-  opacity: 0.85;
   transform: translateY(-1px);
+  box-shadow: 0 6px 0 0 #b8612e;
+}
+.tab-cleanup-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 #b8612e;
 }
 
-/* ---- Nudge banner ---- */
+/* ---- Nudge banner (rose) ---- */
 .nudge-banner {
-  background: linear-gradient(135deg, rgba(179, 90, 90, 0.04), rgba(179, 90, 90, 0.08));
-  border: 1px solid rgba(179, 90, 90, 0.15);
-  border-radius: 8px;
-  padding: 16px 24px;
+  background: linear-gradient(135deg, #fde5e5, #fcd4d2);
+  border: 2px solid #f0a5a5;
+  border-radius: var(--r-card);
+  padding: 14px 20px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 40px;
+  gap: 14px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 0 0 #dc8a8a;
 }
-
 .nudge-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(179, 90, 90, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #fff; border: 2px solid #f0a5a5;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: 0 3px 0 0 #dc8a8a;
 }
+.nudge-icon svg { width: 18px; height: 18px; color: var(--accent-rose); }
+.nudge-text { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.nudge-text strong { font-weight: 800; color: var(--ink-strong); }
 
-.nudge-icon svg {
-  width: 18px;
-  height: 18px;
-  color: var(--status-abandoned);
-}
-
-.nudge-text {
-  font-size: 13px;
-  color: var(--ink);
-  line-height: 1.5;
-}
-
-.nudge-text strong {
-  font-weight: 600;
-}
-
-/* ---- Section Headers ---- */
+/* ============================================================
+   SECTION HEADERS
+   ============================================================ */
 .section-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 20px;
   margin-top: 8px;
 }
 
 .section-header h2 {
-  font-family: 'Newsreader', serif;
-  font-weight: 400;
-  font-size: 18px;
-  font-style: italic;
-  color: var(--muted);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 20px;
+  color: #725d42;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .section-line {
   flex: 1;
-  height: 1px;
-  background: var(--warm-gray);
+  height: 8px;
+  background-image: url('icons/divider.png');
+  background-size: auto 8px;
+  background-repeat: repeat-x;
+  background-position: left center;
+  opacity: 0.55;
+  border-radius: 2px;
 }
 
 .section-count {
   font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
+  color: var(--ink-strong);
+  font-weight: 700;
   letter-spacing: 0.5px;
   white-space: nowrap;
+  background: #fff;
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+  box-shadow: 0 2px 0 0 var(--warm-gray);
 }
 
-/* ---- Mission Cards ---- */
+/* ============================================================
+   MISSION CARDS (domain groups)
+   ============================================================ */
 .missions {
   columns: 280px;
-  column-gap: 12px;
+  column-gap: 16px;
   margin-bottom: 40px;
 }
 
+/*
+ * .mission-card = the "group card" / "tab-card" in Animal Island UI terms.
+ * Matches the Card component spec: 20px radius, warm card bg, bottom shadow,
+ * floats up 4px on hover, thick colored top border (app-blue / app-green logic).
+ */
 .mission-card {
-  background: var(--card-bg);
-  border: 1px solid var(--warm-gray);
-  border-radius: 8px;
-  padding: 16px 18px;
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-top: 5px solid #889df0;       /* app-blue default (domain groups) */
+  border-radius: var(--r-card);
+  padding: 16px 18px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
-  cursor: pointer;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
   position: relative;
   overflow: hidden;
-  break-inside: avoid;       /* don't split a card across columns */
-  margin-bottom: 12px;       /* vertical spacing (replaces grid gap) */
+  break-inside: avoid;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(107, 92, 67, 0.32); /* Animal Island card shadow */
 }
 
-/* Colored top border instead of side bar for grid cards */
-.mission-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--warm-gray);
+/* app-green (seafoam) for active / Homepages group */
+.mission-card.has-active-bar {
+  border-top-color: #82d5bb;
 }
 
-.mission-card.has-active-bar::before { background: var(--status-active); }
-.mission-card.has-amber-bar::before { background: var(--accent-amber); }
-.mission-card.has-neutral-bar::before { background: var(--warm-gray); }
+/* app-yellow for amber / duplicate-flagged groups */
+.mission-card.has-amber-bar {
+  border-top-color: #f7cd67;
+}
+
+/* app-blue for neutral domain groups (explicit fallback) */
+.mission-card.has-neutral-bar {
+  border-top-color: #889df0;
+}
 
 .mission-card:hover {
-  box-shadow: 0 4px 20px var(--shadow);
-  transform: translateY(-1px);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(107, 92, 67, 0.28);
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
 }
 
-/* Closing animation â€” card scales down and fades out */
 .mission-card.closing {
   opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: scale(0.9) translateY(8px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
   pointer-events: none;
 }
 
-.mission-card.collapsed {
-  display: none !important;
-}
+.mission-card.collapsed { display: none !important; }
 
-/* Old side status bar â€” hidden, replaced by top border via ::before */
-.status-bar {
-  display: none;
-}
+.status-bar { display: none; }
 
-.mission-content {
-  min-width: 0;
-}
-
-/* Hide the right-side meta (page count) â€” info is already in the badge */
-.mission-meta {
-  display: none;
-}
+.mission-content { min-width: 0; }
+.mission-meta { display: none; }
 
 .mission-top {
   display: flex;
@@ -294,59 +396,68 @@ header {
 }
 
 .mission-name {
-  font-weight: 600;
+  font-weight: 800;
   font-size: 15px;
-  color: var(--ink);
-  letter-spacing: -0.2px;
+  color: var(--ink-strong);
+  letter-spacing: 0;
 }
 
 .mission-tag {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 3px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 2px solid transparent;
 }
 
 .mission-tag.active {
-  color: var(--status-active);
-  background: rgba(61, 122, 74, 0.08);
+  color: #fff;
+  background: var(--accent-sage);
+  border-color: var(--accent-sage-deep);
 }
 
 .mission-tag.cooling {
-  color: var(--status-cooling);
-  background: rgba(184, 137, 46, 0.08);
+  color: #7a5b1e;
+  background: var(--accent-sun);
+  border-color: #dba90e;
 }
 
 .mission-tag.abandoned {
-  color: var(--status-abandoned);
-  background: rgba(179, 90, 90, 0.08);
+  color: #fff;
+  background: var(--accent-rose);
+  border-color: #c94444;
 }
 
-/* Tab indicator badge â€” shows how many Chrome tabs are still open for this mission */
+.mission-tag.neutral {
+  color: var(--muted);
+  background: #fff;
+  border-color: var(--warm-gray);
+}
+
+/* Tab count badge (shows how many tabs for this domain) */
 .open-tabs-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  font-weight: 500;
-  color: var(--accent-amber);
-  background: rgba(200, 113, 58, 0.08);
-  padding: 2px 8px;
-  border-radius: 3px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--accent-teal);
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--accent-teal-active);
+  letter-spacing: 0.05em;
 }
-
-.open-tabs-badge svg {
-  width: 10px;
-  height: 10px;
-}
+.open-tabs-badge svg { width: 10px; height: 10px; }
 
 .mission-summary {
   font-size: 13px;
   color: var(--muted);
   line-height: 1.5;
   margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .mission-pages {
@@ -355,236 +466,274 @@ header {
   gap: 0;
 }
 
-/* ---- Tab row â€” each tab is a full-width row with favicon, title, and actions ---- */
+/* ============================================================
+   TAB ROWS (page chips)
+   ============================================================ */
 .page-chip {
   font-size: 13px;
+  font-weight: 500;
   color: var(--ink);
   background: transparent;
-  padding: 8px 4px;
-  border-radius: 0;
+  padding: 8px 10px;
+  border-radius: var(--r-pill);
   border: none;
-  border-bottom: 1px solid rgba(154, 145, 138, 0.1);
+  border-bottom: 1.5px dashed rgba(159, 146, 125, 0.28);
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   line-height: 1.4;
 }
 
 .page-chip:last-child,
-.page-chip-overflow {
-  border-bottom: none;
-}
+.page-chip-overflow { border-bottom: none; }
 
-/* Favicon */
 .chip-favicon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  border-radius: 2px;
+  border-radius: 6px;
+  background: #fff;
+  padding: 1px;
+  box-shadow: 0 1px 0 0 var(--warm-gray);
 }
 
-/* Title text â€” wraps naturally, no truncation */
 .chip-text {
   flex: 1;
   min-width: 0;
-  /* Show up to 2 lines, then ellipsis */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Duplicate badge */
 .chip-dupe-badge {
-  color: var(--accent-amber);
-  font-weight: 600;
+  color: #fff;
+  background: var(--accent-amber);
+  border: 2px solid #c8713a;
+  border-radius: var(--r-pill);
+  padding: 1px 8px;
+  font-weight: 800;
+  font-size: 11px;
+  box-shadow: 0 2px 0 0 #b8612e;
 }
 
-/* Duplicate border highlight */
 .chip-has-dupes {
-  border-color: rgba(200, 113, 58, 0.25);
+  background: rgba(247, 205, 103, 0.25);
+  border-bottom-color: transparent;
 }
 
-/* Action buttons grouped on the right */
 .chip-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex-shrink: 0;
   margin-left: auto;
 }
 
-/* ---- Chip action buttons (save + close) ---- */
 .chip-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
+  background: transparent;
+  border: 2px solid transparent;
   color: var(--muted);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  opacity: 0.35;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  padding: 5px;
+  border-radius: 50%;
+  opacity: 0.5;
+  transition: all 0.15s var(--ease);
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
 }
 
-.chip-action svg {
-  width: 15px;
-  height: 15px;
-}
+.chip-action svg { width: 14px; height: 14px; }
 
 .chip-action:hover {
   opacity: 1;
-  background: rgba(154, 145, 138, 0.1);
+  transform: translateY(-1px);
 }
 
 .chip-save:hover {
-  color: var(--accent-sage);
-  background: rgba(90, 122, 98, 0.08);
+  color: #fff;
+  background: var(--accent-sage-soft);
+  border-color: var(--accent-sage-deep);
+  box-shadow: 0 3px 0 0 var(--accent-sage-deep);
 }
 
 .chip-close:hover {
-  color: var(--status-abandoned);
-  background: rgba(179, 90, 90, 0.08);
+  color: #fff;
+  background: var(--accent-rose);
+  border-color: #c94444;
+  box-shadow: 0 3px 0 0 #c94444;
 }
 
 .page-chip.clickable {
-  cursor: pointer;
-  transition: background 0.15s ease;
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  transition: background 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
 .page-chip.clickable:hover {
-  background: rgba(200, 113, 58, 0.04);
+  background: var(--accent-teal-soft);
+  transform: translateX(2px);
 }
 
-/* "+N more" overflow chip */
 .page-chip-overflow {
   font-size: 12px;
   color: var(--muted);
-  padding: 6px 4px;
+  padding: 6px 10px;
+  font-weight: 700;
 }
 
-/* mission-meta hidden â€” see above */
-
-.mission-time {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-
+.mission-time { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .mission-page-count {
-  font-size: 20px;
-  font-family: 'Newsreader', serif;
-  font-weight: 300;
-  color: var(--ink);
+  font-size: 24px;
+  font-family: var(--font-body);
+  font-weight: 900;
+  color: var(--ink-strong);
   line-height: 1;
 }
-
 .mission-page-label {
   font-size: 10px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: 700;
 }
 
-/* ---- Actions row ---- */
+/* ============================================================
+   ACTION BUTTONS (mission footer)
+   ============================================================ */
 .actions {
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .action-btn {
-  font-size: 11px;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  padding: 5px 14px;
-  border-radius: 4px;
-  border: 1px solid var(--warm-gray);
-  background: var(--card-bg);
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.2s;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--warm-gray);
+  background: #fff;
+  color: var(--ink);
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
+              background var(--dur) var(--ease), color var(--dur) var(--ease),
+              border-color var(--dur) var(--ease);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  box-shadow: 0 3px 0 0 var(--warm-gray);
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .action-btn:hover {
-  border-color: var(--ink);
-  color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 var(--warm-gray);
+  border-color: var(--muted);
+  color: var(--ink-strong);
+}
+.action-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 var(--warm-gray);
 }
 
-.action-btn svg {
-  width: 12px;
-  height: 12px;
-}
+.action-btn svg { width: 12px; height: 12px; }
 
 .action-btn.primary {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--accent-teal);
+  color: #fff;
+  border-color: var(--accent-teal-active);
+  box-shadow: 0 4px 0 0 var(--accent-teal-active);
 }
-
 .action-btn.primary:hover {
-  opacity: 0.85;
+  background: var(--accent-teal-hover);
+  border-color: var(--accent-teal-active);
+  box-shadow: 0 5px 0 0 var(--accent-teal-active);
+}
+.action-btn.primary:active {
+  box-shadow: 0 1px 0 0 var(--accent-teal-active);
 }
 
 .action-btn.close-tabs {
-  border-color: rgba(200, 113, 58, 0.3);
-  color: var(--accent-amber);
-  background: rgba(200, 113, 58, 0.04);
+  border-color: #e59266;
+  color: #fff;
+  background: #f0a987;
+  box-shadow: 0 4px 0 0 #b8612e;
 }
-
 .action-btn.close-tabs:hover {
-  background: rgba(200, 113, 58, 0.1);
-  border-color: var(--accent-amber);
+  background: #e59266;
+  border-color: #c8713a;
+  color: #fff;
+  box-shadow: 0 5px 0 0 #b8612e;
+}
+.action-btn.close-tabs:active {
+  box-shadow: 0 1px 0 0 #b8612e;
 }
 
 .action-btn.save-tabs {
-  border-color: rgba(90, 122, 98, 0.3);
-  color: var(--accent-sage);
-  background: rgba(90, 122, 98, 0.04);
+  border-color: var(--accent-sage-deep);
+  color: #fff;
+  background: var(--accent-sage-soft);
+  box-shadow: 0 4px 0 0 var(--accent-sage-deep);
 }
-
 .action-btn.save-tabs:hover {
-  background: rgba(90, 122, 98, 0.1);
-  border-color: var(--accent-sage);
+  background: var(--accent-sage);
+  border-color: var(--accent-sage-deep);
+  color: #fff;
+  box-shadow: 0 5px 0 0 var(--accent-sage-deep);
+}
+.action-btn.save-tabs:active {
+  box-shadow: 0 1px 0 0 var(--accent-sage-deep);
 }
 
 .action-btn.danger {
-  color: var(--status-abandoned);
+  color: #fff;
+  background: var(--accent-rose);
+  border-color: #c94444;
+  box-shadow: 0 4px 0 0 #c94444;
 }
-
 .action-btn.danger:hover {
-  border-color: var(--status-abandoned);
-  color: var(--status-abandoned);
+  background: #e05a5a;
+  border-color: #c94444;
+  color: #fff;
+  box-shadow: 0 5px 0 0 #c94444;
+}
+.action-btn.danger:active {
+  box-shadow: 0 1px 0 0 #c94444;
 }
 
-/* ---- Toast notification ---- */
+/* ============================================================
+   TOAST
+   ============================================================ */
 .toast {
   position: fixed;
   bottom: 32px;
   left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: var(--ink);
-  color: var(--paper);
-  font-family: 'DM Sans', sans-serif;
+  background: var(--card-bg-soft);
+  color: var(--ink-strong);
+  font-family: var(--font-body);
   font-size: 13px;
-  font-weight: 500;
-  padding: 12px 24px;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  font-weight: 700;
+  padding: 12px 22px;
+  border: 2px solid var(--accent-sage-deep);
+  border-radius: var(--r-pill);
+  box-shadow: 0 6px 0 0 var(--accent-sage-deep);
   z-index: 100;
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: 0.02em;
 }
 
 .toast.visible {
@@ -592,38 +741,38 @@ header {
   transform: translateX(-50%) translateY(0);
 }
 
-.toast svg {
-  width: 16px;
-  height: 16px;
-  color: var(--status-active);
-}
+.toast svg { width: 18px; height: 18px; color: var(--accent-sage); }
 
-/* ---- Footer ---- */
+/* ============================================================
+   FOOTER
+   ============================================================ */
 footer {
-  margin-top: 48px;
-  padding-top: 20px;
-  border-top: 1px solid var(--warm-gray);
+  margin-top: 56px;
+  padding: 20px 28px;
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-card);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: var(--card-shadow);
+  position: relative;
 }
 
-.footer-stats {
-  display: flex;
-  gap: 32px;
-}
+/* No extra footer ::after ¡X the ocean scene is handled by .container::after */
 
-.stat {
-  text-align: center;
-}
+.footer-stats { display: flex; gap: 32px; }
+
+.stat { text-align: center; }
 
 .stat-num {
-  font-family: 'Newsreader', serif;
+  font-family: var(--font-body);
   font-size: 28px;
-  font-weight: 300;
-  color: var(--ink);
+  font-weight: 900;
+  color: var(--ink-strong);
   line-height: 1;
-  transition: all 0.3s;
+  letter-spacing: 1px;
+  transition: transform 0.3s var(--ease);
 }
 
 .stat-label {
@@ -631,353 +780,312 @@ footer {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 6px;
+  font-weight: 700;
 }
 
 .last-refresh {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
+  font-weight: 600;
 }
 
+.last-refresh a {
+  color: var(--accent-teal-active) !important;
+  text-decoration: none !important;
+  font-weight: 800;
+}
+.last-refresh a:hover { color: var(--accent-teal) !important; }
+
 .refresh-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--accent-amber);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-teal-active);
   background: none;
   border: none;
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
-/* ---- Animations ---- */
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-header { animation: fadeUp 0.5s ease both; }
-.tab-cleanup-banner { animation: fadeUp 0.5s ease 0.1s both; }
-.nudge-banner { animation: fadeUp 0.5s ease 0.15s both; }
-.active-section .section-header { animation: fadeUp 0.5s ease 0.2s both; }
-.active-section .missions .mission-card:nth-child(1) { animation: fadeUp 0.4s ease 0.25s both; }
-.active-section .missions .mission-card:nth-child(2) { animation: fadeUp 0.4s ease 0.3s both; }
-.active-section .missions .mission-card:nth-child(3) { animation: fadeUp 0.4s ease 0.35s both; }
-.active-section .missions .mission-card:nth-child(4) { animation: fadeUp 0.4s ease 0.4s both; }
-.abandoned-section .section-header { animation: fadeUp 0.5s ease 0.45s both; }
-.abandoned-section .missions .mission-card:nth-child(1) { animation: fadeUp 0.4s ease 0.5s both; }
-.abandoned-section .missions .mission-card:nth-child(2) { animation: fadeUp 0.4s ease 0.55s both; }
-.abandoned-section .missions .mission-card:nth-child(3) { animation: fadeUp 0.4s ease 0.6s both; }
-footer { animation: fadeUp 0.5s ease 0.65s both; }
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.85) translateY(8px); }
+  60%  { opacity: 1; transform: scale(1.04) translateY(0); }
+  100% { transform: scale(1); }
+}
+
+header                { animation: fadeUp 0.5s var(--ease) both; }
+.tab-cleanup-banner   { animation: fadeUp 0.5s var(--ease) 0.1s both; }
+.nudge-banner         { animation: fadeUp 0.5s var(--ease) 0.15s both; }
+.active-section .section-header                         { animation: fadeUp 0.5s var(--ease) 0.2s both; }
+.active-section .missions .mission-card:nth-child(1)    { animation: popIn 0.45s var(--ease) 0.25s both; }
+.active-section .missions .mission-card:nth-child(2)    { animation: popIn 0.45s var(--ease) 0.32s both; }
+.active-section .missions .mission-card:nth-child(3)    { animation: popIn 0.45s var(--ease) 0.39s both; }
+.active-section .missions .mission-card:nth-child(4)    { animation: popIn 0.45s var(--ease) 0.46s both; }
+.abandoned-section .section-header                      { animation: fadeUp 0.5s var(--ease) 0.5s both; }
+footer                                                   { animation: fadeUp 0.5s var(--ease) 0.7s both; }
 
 .deferred-list .deferred-item:nth-child(1) { animation-delay: 0.05s; }
-.deferred-list .deferred-item:nth-child(2) { animation-delay: 0.1s; }
+.deferred-list .deferred-item:nth-child(2) { animation-delay: 0.10s; }
 .deferred-list .deferred-item:nth-child(3) { animation-delay: 0.15s; }
-.deferred-list .deferred-item:nth-child(4) { animation-delay: 0.2s; }
+.deferred-list .deferred-item:nth-child(4) { animation-delay: 0.20s; }
 .deferred-list .deferred-item:nth-child(5) { animation-delay: 0.25s; }
-.deferred-column .section-header { animation: fadeUp 0.5s ease 0.1s both; }
+.deferred-column .section-header { animation: fadeUp 0.5s var(--ease) 0.1s both; }
 
+/* ============================================================
+   DEFAULT / STATIC VIEW HELPERS
+   ============================================================ */
+.status-bar.neutral { background: var(--warm-gray); }
 
-/* ================================================================
-   STATIC DEFAULT VIEW â€” new elements added for "AI on demand"
-   ================================================================ */
-
-/* ---- Neutral status bar (domain-grouped cards, no AI color) ---- */
-.status-bar.neutral {
-  background: var(--warm-gray);
-}
-
-/* ---- "Domain" tag on static domain cards ---- */
-.mission-tag.neutral {
-  color: var(--muted);
-  background: rgba(154, 145, 138, 0.1);
-}
-
-/* ================================================================
-   MISSIONS EMPTY STATE
-   Shown when all mission cards have been closed.
-   A calm, satisfying "you did it" moment.
-   ================================================================ */
-
+/* ============================================================
+   MISSIONS EMPTY STATE ¡X "you did it"
+   ============================================================ */
 .missions-empty-state {
-  /* Takes the full width â€” spans all columns */
   column-span: all;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-
-  padding: 56px 24px;
+  gap: 14px;
+  padding: 64px 24px;
   text-align: center;
-
-  animation: fadeUp 0.5s ease both;
+  animation: fadeUp 0.5s var(--ease) both;
 }
 
-/* CSS-drawn checkmark in a glowing circle */
 .empty-checkmark {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: rgba(90, 122, 98, 0.1);
-  border: 1.5px solid rgba(90, 122, 98, 0.3);
-
-  /* Soft sage glow */
-  box-shadow: 0 0 0 8px rgba(90, 122, 98, 0.05),
-              0 0 0 16px rgba(90, 122, 98, 0.03);
-
+  background: var(--accent-sage-soft);
+  border: 3px solid var(--accent-sage-deep);
+  box-shadow: 0 6px 0 0 var(--accent-sage-deep);
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* Pop in with a gentle scale animation */
-  animation: checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  animation: checkPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
 
 .empty-checkmark svg {
-  width: 26px;
-  height: 26px;
-  color: var(--accent-sage);
-  stroke-width: 2.5;
+  width: 30px;
+  height: 30px;
+  color: #fff;
+  stroke-width: 3;
 }
 
 @keyframes checkPop {
-  from { transform: scale(0.6); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from { transform: scale(0.5) translateY(10px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);   opacity: 1; }
 }
 
 .empty-title {
-  font-family: 'Newsreader', serif;
+  font-family: var(--font-body);
   font-size: 20px;
-  font-weight: 400;
-  font-style: italic;
-  color: var(--ink);
-  letter-spacing: -0.3px;
+  font-weight: 800;
+  color: var(--ink-strong);
+  letter-spacing: 0.01em;
 }
 
 .empty-subtitle {
   font-size: 13px;
   color: var(--muted);
-  font-weight: 400;
+  font-weight: 600;
   letter-spacing: 0.3px;
 }
 
-
-/* ================================================================
+/* ============================================================
    UPDATE BANNER
-   Appears at the very top of the page when a new version is available.
-   Intentionally thin and unobtrusive â€” it's informational, not urgent.
-   The warm sage green palette feels calm and positive ("new thing!"),
-   contrasting with the amber/rose warning tones used elsewhere.
-   ================================================================ */
-
+   ============================================================ */
 .update-banner {
-  /* Thin bar â€” sits above the header, below the container's top padding */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-
-  /* Sage green tint â€” matches accent-sage but very light */
-  background: linear-gradient(135deg, rgba(90, 122, 98, 0.05), rgba(90, 122, 98, 0.10));
-  border: 1px solid rgba(90, 122, 98, 0.22);
-  border-radius: 8px;
-  padding: 10px 16px;
-
-  /* Push the header down slightly */
+  background: linear-gradient(135deg, #e6f9f6, #d8f1ec);
+  border: 2px solid var(--accent-teal);
+  border-radius: var(--r-card);
+  padding: 12px 18px;
   margin-bottom: 24px;
-
-  /* Slide in from above when it appears */
+  box-shadow: 0 4px 0 0 var(--accent-teal-active);
   animation: bannerSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes bannerSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Left cluster: icon + text */
 .update-banner-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0; /* prevents text overflow from breaking layout */
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
 }
 
 .update-banner-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--accent-sage);
+  width: 18px; height: 18px; color: var(--accent-teal-active);
   flex-shrink: 0;
-  opacity: 0.85;
 }
 
 .update-banner-text {
   font-size: 13px;
-  color: var(--ink);
-  font-weight: 400;
+  color: var(--ink-strong);
+  font-weight: 600;
   line-height: 1.4;
-  opacity: 0.85;
 }
 
-/* Right cluster: action button + dismiss X */
 .update-banner-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
 
-/* "Update now" button â€” small, filled, sage green */
 .update-banner-btn {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 800;
   color: #fff;
-  background: var(--accent-sage);
-  border: none;
-  border-radius: 5px;
-  padding: 5px 12px;
+  background: var(--accent-teal);
+  border: 2px solid var(--accent-teal-active);
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
   cursor: pointer;
-  letter-spacing: 0.2px;
-  transition: background 0.2s, opacity 0.2s;
+  letter-spacing: 0.02em;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   white-space: nowrap;
+  box-shadow: 0 4px 0 0 var(--accent-teal-active);
 }
 
 .update-banner-btn:hover {
-  background: #4a6952; /* slightly darker sage */
+  transform: translateY(-1px);
+  background: var(--accent-teal-hover);
+  box-shadow: 0 5px 0 0 var(--accent-teal-active);
 }
-
+.update-banner-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 var(--accent-teal-active);
+}
 .update-banner-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-/* Dismiss X button â€” minimal, icon-only */
 .update-banner-dismiss {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border: 2px solid transparent;
   background: transparent;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 50%;
   color: var(--muted);
   transition: background 0.15s, color 0.15s;
-  padding: 0;
-  flex-shrink: 0;
+  padding: 0; flex-shrink: 0;
 }
 
 .update-banner-dismiss:hover {
-  background: rgba(26, 22, 19, 0.06);
-  color: var(--ink);
+  background: #fff;
+  border-color: var(--warm-gray);
+  color: var(--ink-strong);
 }
 
-.update-banner-dismiss svg {
-  width: 14px;
-  height: 14px;
-}
+.update-banner-dismiss svg { width: 14px; height: 14px; }
 
-
-/* ================================================================
-   SAVED FOR LATER â€” Checklist Column + Archive
-   ================================================================ */
-
-/* ---- Two-column layout ---- */
+/* ============================================================
+   SAVED FOR LATER ¡X right column checklist + archive
+   ============================================================ */
 .dashboard-columns {
   display: flex;
   gap: 32px;
   align-items: flex-start;
 }
 
-/* Open tabs column keeps the grid layout */
 .dashboard-columns .active-section {
   flex: 1;
   min-width: 600px;
 }
 
-/* Saved for later column â€” fixed width on the right, scrolls independently */
 .deferred-column {
-  width: 280px;
+  width: 300px;
   flex-shrink: 0;
   position: sticky;
   top: 32px;
   max-height: calc(100vh - 64px);
   overflow-y: auto;
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-card);
+  padding: 20px;
+  box-shadow: var(--card-shadow);
 }
 
-/* On narrow screens, stack vertically */
 @media (max-width: 800px) {
-  .dashboard-columns {
-    flex-direction: column;
-  }
-  .deferred-column {
-    width: 100%;
-    position: static;
-  }
+  .dashboard-columns { flex-direction: column; }
+  .deferred-column { width: 100%; position: static; }
 }
 
-/* ---- Checklist items ---- */
+.deferred-list { margin-top: 4px; }
+
 .deferred-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(154, 145, 138, 0.12);
-  animation: fadeUp 0.3s ease both;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1.5px dashed rgba(159, 146, 125, 0.28);
+  animation: fadeUp 0.3s var(--ease) both;
 }
 
-.deferred-item:last-child {
-  border-bottom: none;
-}
+.deferred-item:last-child { border-bottom: none; }
 
-/* Custom checkbox */
+/* Custom checkbox ¡X rounded green like AC¡¦s gameplay ticks */
 .deferred-checkbox {
   appearance: none;
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--warm-gray);
-  border-radius: 4px;
-  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--muted-soft);
+  border-radius: 8px;
+  background: #fff;
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
   flex-shrink: 0;
-  margin-top: 1px;
-  transition: all 0.2s;
+  margin-top: 2px;
+  transition: all 0.2s var(--ease);
   position: relative;
+  box-shadow: 0 2px 0 0 var(--press-shadow-soft);
 }
 
 .deferred-checkbox:hover {
   border-color: var(--accent-sage);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 0 var(--press-shadow-soft);
 }
 
 .deferred-checkbox:checked {
-  background: var(--accent-sage);
-  border-color: var(--accent-sage);
+  background: var(--accent-sage-soft);
+  border-color: var(--accent-sage-deep);
+  box-shadow: 0 2px 0 0 var(--accent-sage-deep);
 }
 
-/* Checkmark inside the checkbox */
 .deferred-checkbox:checked::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 5px;
-  width: 4px;
-  height: 8px;
+  top: 3px;
+  left: 6px;
+  width: 5px;
+  height: 10px;
   border: solid white;
-  border-width: 0 2px 2px 0;
+  border-width: 0 3px 3px 0;
   transform: rotate(45deg);
 }
 
-/* Item content (title, domain, time) */
-.deferred-info {
-  flex: 1;
-  min-width: 0;
+.deferred-checkbox:focus-visible {
+  outline: 2px solid var(--accent-focus);
+  outline-offset: 2px;
 }
+
+.deferred-info { flex: 1; min-width: 0; }
 
 .deferred-title {
   font-size: 13px;
@@ -988,151 +1096,166 @@ footer { animation: fadeUp 0.5s ease 0.65s both; }
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.15s;
+  font-weight: 600;
 }
 
-.deferred-title:hover {
-  color: var(--accent-amber);
-}
+.deferred-title:hover { color: var(--accent-teal-active); }
 
 .deferred-meta {
   font-size: 11px;
   color: var(--muted);
-  margin-top: 2px;
+  margin-top: 3px;
   display: flex;
   gap: 8px;
+  font-weight: 600;
 }
 
-/* Checked-off item â€” strikethrough + faded */
 .deferred-item.checked .deferred-title {
   text-decoration: line-through;
   color: var(--muted);
 }
+.deferred-item.checked .deferred-meta { opacity: 0.5; }
 
-.deferred-item.checked .deferred-meta {
-  opacity: 0.5;
-}
-
-/* Dismiss (X) button */
 .deferred-dismiss {
   background: none;
-  border: none;
+  border: 2px solid transparent;
   color: var(--muted);
-  cursor: pointer;
-  padding: 2px;
-  opacity: 0.3;
-  transition: opacity 0.15s, color 0.15s;
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
+  padding: 3px;
+  border-radius: 50%;
+  opacity: 0.4;
+  transition: opacity 0.15s, color 0.15s, background 0.15s, border-color 0.15s;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
+  width: 24px;
+  height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
 }
-
-.deferred-dismiss svg {
-  width: 14px;
-  height: 14px;
-}
-
+.deferred-dismiss svg { width: 12px; height: 12px; }
 .deferred-dismiss:hover {
   opacity: 1;
-  color: var(--status-abandoned);
+  color: #fff;
+  background: var(--accent-rose);
+  border-color: #c94444;
 }
 
-/* Slide-out animation for items being removed */
 .deferred-item.removing {
   opacity: 0;
   transform: translateX(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s, transform 0.3s;
 }
 
-/* ---- Empty state ---- */
 .deferred-empty {
   font-size: 13px;
   color: var(--muted);
   font-style: italic;
-  padding: 24px 0;
+  padding: 28px 0;
   text-align: center;
+  font-weight: 500;
 }
 
-/* ---- Archive section ---- */
+/* ---- Archive ---- */
 .deferred-archive {
   margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--warm-gray);
+  padding-top: 14px;
+  border-top: 1.5px dashed var(--warm-gray);
 }
 
 .archive-toggle {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  background: none;
-  border: none;
-  cursor: pointer;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--card-bg);
+  border: 2px solid var(--warm-gray);
+  cursor: url('icons/cursor-finger.png') 38 5, pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 0;
+  gap: 8px;
+  padding: 8px 14px;
   width: 100%;
   text-align: left;
-  transition: color 0.15s;
+  transition: all 0.15s var(--ease);
+  border-radius: var(--r-pill);
+  box-shadow: 0 3px 0 0 var(--warm-gray);
+  letter-spacing: 0.02em;
 }
 
 .archive-toggle:hover {
-  color: var(--ink);
+  color: var(--ink-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 var(--warm-gray);
+}
+
+/* ---- Leaf decoration on archive/collapse toggle (Animal Island UI style) ---- */
+.leaf-decoration {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent-sage);
+  opacity: 0.55;
+  transition: transform 0.3s var(--ease), opacity 0.3s var(--ease), color 0.3s;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.archive-toggle.open .leaf-decoration {
+  transform: rotate(45deg);
+  opacity: 1;
+  color: var(--accent-sage-deep);
 }
 
 .archive-chevron {
   width: 14px;
   height: 14px;
-  transition: transform 0.2s;
+  transition: transform 0.25s var(--ease);
 }
 
-.archive-toggle.open .archive-chevron {
-  transform: rotate(180deg);
-}
+.archive-toggle.open .archive-chevron { transform: rotate(180deg); }
 
 .archive-count {
+  margin-left: auto;
   font-size: 11px;
-  color: var(--muted);
-  opacity: 0.7;
+  color: #fff;
+  background: var(--muted);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-weight: 800;
 }
 
-.archive-body {
-  padding-top: 12px;
-}
+.archive-body { padding-top: 14px; }
 
 .archive-search {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--warm-gray);
-  border-radius: 6px;
-  background: var(--card-bg);
+  padding: 10px 16px;
+  border: 2.5px solid var(--muted-soft);
+  border-radius: var(--r-pill);
+  background: #fff;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   margin-bottom: 12px;
+  box-shadow: 0 3px 0 0 var(--press-shadow-soft);
+  letter-spacing: 0.01em;
 }
 
 .archive-search:focus {
-  border-color: var(--accent-amber);
+  border-color: var(--accent-focus);
+  box-shadow: 0 3px 0 0 #e0b800, 0 0 0 3px rgba(255, 204, 0, 0.25);
 }
 
-.archive-search::placeholder {
-  color: var(--muted);
-}
+.archive-search::placeholder { color: var(--muted-soft); }
 
-/* Archive items are simpler â€” just title + domain + date */
 .archive-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(154, 145, 138, 0.08);
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1.5px dashed rgba(159, 146, 125, 0.2);
 }
-
-.archive-item:last-child {
-  border-bottom: none;
-}
+.archive-item:last-child { border-bottom: none; }
 
 .archive-item-title {
   font-size: 12px;
@@ -1144,15 +1267,35 @@ footer { animation: fadeUp 0.5s ease 0.65s both; }
   flex: 1;
   min-width: 0;
   transition: color 0.15s;
+  font-weight: 600;
 }
 
-.archive-item-title:hover {
-  color: var(--ink);
-}
+.archive-item-title:hover { color: var(--ink-strong); }
 
 .archive-item-date {
   font-size: 10px;
   color: var(--muted);
-  opacity: 0.6;
+  opacity: 0.75;
   flex-shrink: 0;
+  font-weight: 700;
 }
+
+/* ============================================================
+   GLOBAL FOCUS ¡X yellow, never blue
+   ============================================================ */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2.5px solid var(--accent-focus);
+  outline-offset: 3px;
+  border-radius: var(--r-pill);
+}
+
+/* Scrollbar (webkit) ¡X subtle warm */
+.deferred-column::-webkit-scrollbar { width: 8px; }
+.deferred-column::-webkit-scrollbar-track { background: transparent; }
+.deferred-column::-webkit-scrollbar-thumb {
+  background: var(--muted-soft);
+  border-radius: var(--r-pill);
+}
+.deferred-column::-webkit-scrollbar-thumb:hover { background: var(--muted); }

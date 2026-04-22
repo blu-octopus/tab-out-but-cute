@@ -1,9 +1,9 @@
 /* ================================================================
-   Tab Out — Dashboard App (Pure Extension Edition)
+   Tab Out ??? Dashboard App (Pure Extension Edition)
 
    This file is the brain of the dashboard. Now that the dashboard
    IS the extension page (not inside an iframe), it can call
-   chrome.tabs and chrome.storage directly — no postMessage bridge needed.
+   chrome.tabs and chrome.storage directly ??? no postMessage bridge needed.
 
    What this file does:
    1. Reads open browser tabs directly via chrome.tabs.query()
@@ -17,13 +17,13 @@
 
 
 /* ----------------------------------------------------------------
-   CHROME TABS — Direct API Access
+   CHROME TABS ??? Direct API Access
 
    Since this page IS the extension's new tab page, it has full
    access to chrome.tabs and chrome.storage. No middleman needed.
    ---------------------------------------------------------------- */
 
-// All open tabs — populated by fetchOpenTabs()
+// All open tabs ??? populated by fetchOpenTabs()
 let openTabs = [];
 
 /**
@@ -146,8 +146,8 @@ async function focusTab(url) {
  * closeDuplicateTabs(urls, keepOne)
  *
  * Closes duplicate tabs for the given list of URLs.
- * keepOne=true → keep one copy of each, close the rest.
- * keepOne=false → close all copies.
+ * keepOne=true ??? keep one copy of each, close the rest.
+ * keepOne=false ??? close all copies.
  */
 async function closeDuplicateTabs(urls, keepOne = true) {
   const allTabs = await chrome.tabs.query({});
@@ -186,7 +186,7 @@ async function closeTabOutDupes() {
 
   if (tabOutTabs.length <= 1) return;
 
-  // Keep the active Tab Out tab in the CURRENT window — that's the one the
+  // Keep the active Tab Out tab in the CURRENT window ??? that's the one the
   // user is looking at right now. Falls back to any active one, then the first.
   const keep =
     tabOutTabs.find(t => t.active && t.windowId === currentWindow.id) ||
@@ -199,7 +199,7 @@ async function closeTabOutDupes() {
 
 
 /* ----------------------------------------------------------------
-   SAVED FOR LATER — chrome.storage.local
+   SAVED FOR LATER ??? chrome.storage.local
 
    Replaces the old server-side SQLite + REST API with Chrome's
    built-in key-value storage. Data persists across browser sessions
@@ -292,7 +292,7 @@ async function dismissSavedTab(id) {
  * playCloseSound()
  *
  * Plays a clean "swoosh" sound when tabs are closed.
- * Built entirely with the Web Audio API — no sound files needed.
+ * Built entirely with the Web Audio API ??? no sound files needed.
  * A filtered noise sweep that descends in pitch, like air moving.
  */
 function playCloseSound() {
@@ -316,7 +316,7 @@ function playCloseSound() {
     const source = ctx.createBufferSource();
     source.buffer = buffer;
 
-    // Bandpass filter sweeps from high to low — creates the "swoosh" character
+    // Bandpass filter sweeps from high to low ??? creates the "swoosh" character
     const filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
     filter.Q.value = 2.0;
@@ -333,7 +333,7 @@ function playCloseSound() {
 
     setTimeout(() => ctx.close(), 500);
   } catch {
-    // Audio not supported — fail silently
+    // Audio not supported ??? fail silently
   }
 }
 
@@ -345,15 +345,18 @@ function playCloseSound() {
  * Pure CSS + JS, no libraries.
  */
 function shootConfetti(x, y) {
+  // NookPhone app palette �X Animal Crossing style
   const colors = [
-    '#c8713a', // amber
-    '#e8a070', // amber light
-    '#5a7a62', // sage
-    '#8aaa92', // sage light
-    '#5a6b7a', // slate
-    '#8a9baa', // slate light
-    '#d4b896', // warm paper
-    '#b35a5a', // rose
+    '#19c8b9', // mint teal
+    '#6fba2c', // leaf green
+    '#86d67a', // switch-on green
+    '#f7cd67', // sunshine yellow
+    '#e59266', // warm orange
+    '#fc736d', // coral red
+    '#f8a6b2', // app pink
+    '#889df0', // sky blue
+    '#b77dee', // lavender purple
+    '#82d5bb', // seafoam
   ];
 
   const particleCount = 17;
@@ -362,7 +365,7 @@ function shootConfetti(x, y) {
     const el = document.createElement('div');
 
     const isCircle = Math.random() > 0.5;
-    const size = 5 + Math.random() * 6; // 5–11px
+    const size = 5 + Math.random() * 6; // 5???11px
     const color = colors[Math.floor(Math.random() * colors.length)];
 
     el.style.cssText = `
@@ -388,7 +391,7 @@ function shootConfetti(x, y) {
     const gravity = 200;
 
     const startTime = performance.now();
-    const duration  = 700 + Math.random() * 200; // 700–900ms
+    const duration  = 700 + Math.random() * 200; // 700???900ms
 
     function frame(now) {
       const elapsed  = (now - startTime) / 1000;
@@ -474,7 +477,7 @@ function checkAndShowEmptyState() {
  * timeAgo(dateStr)
  *
  * Converts an ISO date string into a human-friendly relative time.
- * "2026-04-04T10:00:00Z" → "2 hrs ago" or "yesterday"
+ * "2026-04-04T10:00:00Z" ??? "2 hrs ago" or "yesterday"
  */
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -492,7 +495,7 @@ function timeAgo(dateStr) {
 }
 
 /**
- * getGreeting() — "Good morning / afternoon / evening"
+ * getGreeting() ??? "Good morning / afternoon / evening"
  */
 function getGreeting() {
   const hour = new Date().getHours();
@@ -502,7 +505,7 @@ function getGreeting() {
 }
 
 /**
- * getDateDisplay() — "Friday, April 4, 2026"
+ * getDateDisplay() ??? "Friday, April 4, 2026"
  */
 function getDateDisplay() {
   return new Date().toLocaleDateString('en-US', {
@@ -518,7 +521,7 @@ function getDateDisplay() {
    DOMAIN & TITLE CLEANUP HELPERS
    ---------------------------------------------------------------- */
 
-// Map of known hostnames → friendly display names.
+// Map of known hostnames ??? friendly display names.
 const FRIENDLY_DOMAINS = {
   'github.com':           'GitHub',
   'www.github.com':       'GitHub',
@@ -631,7 +634,7 @@ function cleanTitle(title, hostname) {
 
   const friendly = friendlyDomain(hostname);
   const domain   = hostname.replace(/^www\./, '');
-  const seps     = [' - ', ' | ', ' — ', ' · ', ' – '];
+  const seps     = [' - ', ' | ', ' ??? ', ' · ', ' ??? '];
 
   for (const sep of seps) {
     const idx = title.lastIndexOf(sep);
@@ -671,7 +674,7 @@ function smartTitle(title, url) {
       const [owner, repo, ...rest] = parts;
       if (rest[0] === 'issues' && rest[1]) return `${owner}/${repo} Issue #${rest[1]}`;
       if (rest[0] === 'pull'   && rest[1]) return `${owner}/${repo} PR #${rest[1]}`;
-      if (rest[0] === 'blob' || rest[0] === 'tree') return `${owner}/${repo} — ${rest.slice(2).join('/')}`;
+      if (rest[0] === 'blob' || rest[0] === 'tree') return `${owner}/${repo} ??? ${rest.slice(2).join('/')}`;
       if (titleIsUrl) return `${owner}/${repo}`;
     }
   }
@@ -716,7 +719,7 @@ let domainGroups = [];
 /**
  * getRealTabs()
  *
- * Returns tabs that are real web pages — no chrome://, extension
+ * Returns tabs that are real web pages ??? no chrome://, extension
  * pages, about:blank, etc.
  */
 function getRealTabs() {
@@ -769,7 +772,7 @@ function buildOverflowChips(hiddenTabs, urlCounts = {}) {
     try { domain = new URL(tab.url).hostname; } catch {}
     const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=16` : '';
     return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}">
-      ${faviconUrl ? `<img class="chip-favicon" src="${faviconUrl}" alt="" onerror="this.style.display='none'">` : ''}
+      <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" onerror="this.src='icons/leaf-favicon.svg'">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
         <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="Save for later">
@@ -850,7 +853,7 @@ function renderDomainCard(group) {
     try { domain = new URL(tab.url).hostname; } catch {}
     const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=16` : '';
     return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}">
-      ${faviconUrl ? `<img class="chip-favicon" src="${faviconUrl}" alt="" onerror="this.style.display='none'">` : ''}
+      <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" onerror="this.src='icons/leaf-favicon.svg'">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
         <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="Save for later">
@@ -898,7 +901,7 @@ function renderDomainCard(group) {
 
 
 /* ----------------------------------------------------------------
-   SAVED FOR LATER — Render Checklist Column
+   SAVED FOR LATER ??? Render Checklist Column
    ---------------------------------------------------------------- */
 
 /**
@@ -1174,7 +1177,7 @@ async function renderDashboard() {
 
 
 /* ----------------------------------------------------------------
-   EVENT HANDLERS — using event delegation
+   EVENT HANDLERS ??? using event delegation
 
    One listener on document handles ALL button clicks.
    Think of it as one security guard watching the whole building
@@ -1433,7 +1436,7 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-// ---- Archive toggle — expand/collapse the archive section ----
+// ---- Archive toggle ??? expand/collapse the archive section ----
 document.addEventListener('click', (e) => {
   const toggle = e.target.closest('#archiveToggle');
   if (!toggle) return;
@@ -1445,7 +1448,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ---- Archive search — filter archived items as user types ----
+// ---- Archive search ??? filter archived items as user types ----
 document.addEventListener('input', async (e) => {
   if (e.target.id !== 'archiveSearch') return;
 
