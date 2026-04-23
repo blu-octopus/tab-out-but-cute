@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Tab Out",
+  "name": "Island Tab Manager",
   "version": "1.0.0",
   "description": "Keep tabs on your tabs. New tab page that groups your open tabs by domain and lets you close them with style.",
-  "permissions": ["tabs", "activeTab", "storage", "geolocation"],
+  "permissions": ["tabs", "activeTab", "storage", "geolocation", "tabGroups"],
   "host_permissions": ["https://api.open-meteo.com/*"],
   "chrome_url_overrides": { "newtab": "index.html" },
   "background": { "service_worker": "background.js" },

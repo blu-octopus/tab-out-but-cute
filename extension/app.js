@@ -10,7 +10,7 @@
    2. Groups tabs by domain with a landing pages category
    3. Renders domain cards, banners, and stats
    4. Handles all user actions (close tabs, save for later, focus tab)
-   5. Stores "Saved for Later" tabs in chrome.storage.local (no server)
+   5. Stores "Saved for Later" tabs in chrome.storage.sync (no server)
    ================================================================ */
 
 'use strict';
@@ -107,17 +107,129 @@ function getDomainCategory(domain) {
 
 
 /* ================================================================
+   STORAGE LAYER
+   Reads from chrome.storage.sync (persists + syncs across devices).
+   Falls back to localStorage so data survives even when the
+   chrome.* API is unavailable (e.g. local-server preview).
+   Every write mirrors to localStorage as an offline backup.
+   ================================================================ */
+
+const LS_PREFIX = 'island_tab_';
+
+async function storageGet(key) {
+  try {
+    const result = await chrome.storage.sync.get([key]);
+    if (result[key] !== undefined) return result[key];
+  } catch { /* chrome API unavailable */ }
+  // Fallback: localStorage
+  try {
+    const raw = localStorage.getItem(LS_PREFIX + key);
+    return raw ? JSON.parse(raw) : undefined;
+  } catch { return undefined; }
+}
+
+async function storageSet(key, value) {
+  try { await chrome.storage.sync.set({ [key]: value }); } catch {}
+  // Always mirror to localStorage so data is never lost
+  try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(value)); } catch {}
+}
+
+/* ================================================================
    EISENHOWER MATRIX  - Focus Panel
    ================================================================ */
 
-const MATRIX_KEY = 'matrixTasks';
+const MATRIX_KEY  = 'matrixTasks';
+const METRICS_KEY = 'tabOutMetrics';
 
 async function loadMatrixTasks() {
-  try { return (await chrome.storage.local.get([MATRIX_KEY]))[MATRIX_KEY] || []; } catch { return []; }
+  return (await storageGet(MATRIX_KEY)) || [];
 }
 
 async function saveMatrixTasks(tasks) {
-  try { await chrome.storage.local.set({ [MATRIX_KEY]: tasks }); } catch {}
+  await storageSet(MATRIX_KEY, tasks);
+}
+
+/* ============================================================
+   METRICS  -  lifetime usage stats
+   ============================================================ */
+async function loadMetrics() {
+  const d = await storageGet(METRICS_KEY);
+  return Object.assign({ tabsClosed: 0, tabsSaved: 0, sessions: 0, groupsMerged: 0 }, d || {});
+}
+
+async function incrementMetric(field, n = 1) {
+  const m = await loadMetrics();
+  m[field] = (m[field] || 0) + n;
+  await storageSet(METRICS_KEY, m);
+}
+
+/* ============================================================
+   TAB SCORE  -  rates the user's tab hygiene in real time
+   ============================================================ */
+async function computeTabScore(openTabCount, windowCount) {
+  let score = 100;
+
+  // Chaos penalties
+  score -= Math.max(0, openTabCount - 8) * 2;   // -2 per tab over 8
+  score -= Math.max(0, windowCount  - 2) * 5;   // -5 per extra window
+
+  // Organisation bonuses
+  try {
+    const tasks = await loadMatrixTasks();
+    score += Math.min(12, tasks.length * 2);                          // using the matrix
+    score += Math.min(8,  tasks.filter(t => t.done).length * 2);     // actually completing tasks
+  } catch {}
+
+  try {
+    const merges = await loadGroupMerges();
+    score += Math.min(10, merges.length * 4);                        // tidying groups
+  } catch {}
+
+  try {
+    const deferred = (await storageGet(DEFERRED_KEY)) || [];
+    const saved = deferred.filter(t => !t.dismissed).length;
+    score += Math.min(8, saved * 2);                                 // saving instead of piling up
+  } catch {}
+
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function getScoreRating(score) {
+  if (score >= 90) return { grade: 'S',  label: 'Nook Miles Earned!',  color: '#6fba2c' };
+  if (score >= 75) return { grade: 'A',  label: 'Resident Rep.',       color: '#19c8b9' };
+  if (score >= 55) return { grade: 'B',  label: 'Still Settling In',   color: '#f7cd67' };
+  if (score >= 35) return { grade: 'C',  label: 'Behind on Rent',      color: '#e59266' };
+  return                  { grade: 'D',  label: 'Isabelle Needs Help', color: '#fc736d' };
+}
+
+async function renderMetrics(openTabCount) {
+  const el = document.getElementById('tabMetrics');
+  if (!el) return;
+
+  let windowCount = 0;
+  try {
+    const wins = await chrome.windows.getAll({ populate: false });
+    windowCount = wins.length;
+  } catch {}
+
+  const score  = await computeTabScore(openTabCount, windowCount);
+  const rating = getScoreRating(score);
+
+  el.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  el.innerHTML = `
+    <div class="tab-metrics-item">
+      <div class="tab-metrics-num">${openTabCount}</div>
+      <div class="tab-metrics-label">open<br>tabs</div>
+    </div>
+    <div class="tab-metrics-item">
+      <div class="tab-metrics-num">${windowCount}</div>
+      <div class="tab-metrics-label">open<br>window${windowCount !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="tab-metrics-item tab-metrics-score-cell">
+      <div class="tab-metrics-num tab-metrics-score-num" style="color:${rating.color}">${score}</div>
+      <div class="tab-metrics-score-grade" style="color:${rating.color}">${rating.grade}</div>
+      <div class="tab-metrics-label">tab health<br>${rating.label}</div>
+    </div>`;
 }
 
 const Q_CONFIG = {
@@ -265,16 +377,16 @@ function initVillagerDancer() {
 
   setVillager(idx);
 
-  // Cycle every 10 s with a smooth fade
-  setInterval(() => {
+  // Click: switch to next villager (same logic as matrix villager)
+  wrap.addEventListener('click', () => {
     img.style.opacity = '0';
+    bubble.classList.remove('visible');
     setTimeout(() => {
       idx = (idx + 1) % VILLAGER_CAST.length;
-      bubble.classList.remove('visible');
       setVillager(idx);
       img.style.opacity = '1';
-    }, 370);
-  }, 10000);
+    }, 340);
+  });
 
   // Hover: show a random dialogue line for the current villager
   wrap.addEventListener('mouseenter', () => {
@@ -284,6 +396,45 @@ function initVillagerDancer() {
   });
   wrap.addEventListener('mouseleave', () => {
     bubble.classList.remove('visible');
+  });
+}
+
+/**
+ * initMatrixVillager()  -  tiny villager in To-Do panel
+ * Starts on a random villager, hover shows dialogue, click switches character.
+ * Called after renderMatrixColumn() re-renders the DOM.
+ */
+let _matrixVillagerIdx = Math.floor(Math.random() * VILLAGER_CAST.length);
+
+function initMatrixVillager() {
+  const wrap   = document.getElementById('matrixVillagerWrap');
+  const img    = document.getElementById('matrixVillagerImg');
+  const bubble = document.getElementById('matrixVillagerBubble');
+  if (!wrap || !img || !bubble) return;
+
+  function setVillager(i) {
+    const v = VILLAGER_CAST[i];
+    img.src = 'assets/villager dancing/' + v.file;
+    img.alt = v.name;
+  }
+  setVillager(_matrixVillagerIdx);
+
+  wrap.addEventListener('mouseenter', () => {
+    const v = VILLAGER_CAST[_matrixVillagerIdx];
+    bubble.textContent = v.lines[Math.floor(Math.random() * v.lines.length)];
+    bubble.classList.add('visible');
+  });
+  wrap.addEventListener('mouseleave', () => {
+    bubble.classList.remove('visible');
+  });
+  wrap.addEventListener('click', () => {
+    img.style.opacity = '0';
+    bubble.classList.remove('visible');
+    setTimeout(() => {
+      _matrixVillagerIdx = (_matrixVillagerIdx + 1) % VILLAGER_CAST.length;
+      setVillager(_matrixVillagerIdx);
+      img.style.opacity = '1';
+    }, 280);
   });
 }
 
@@ -344,7 +495,7 @@ async function renderMatrixColumn() {
       ${Object.entries(Q_CONFIG).map(([q,c]) => `
         <button class="q-pill${q===prevActive?' active':''}" data-q="${q}"
                 data-action="select-matrix-q"
-                style="--qc:${c.color};--qt:${c.text}">${c.icon} ${c.label}</button>`).join('')}
+                style="--qc:${c.color};--qt:${c.text}">${c.label}</button>`).join('')}
     </div>
     <div class="matrix-input-wrap">
       <input id="matrixInput" class="matrix-input" placeholder="Add a task\u2026" autocomplete="off">
@@ -353,7 +504,14 @@ async function renderMatrixColumn() {
     </div>
     <div class="matrix-grid">
       ${['do','schedule','delegate','cut'].map(renderQ).join('')}
+    </div>
+    <div class="matrix-villager-wrap" id="matrixVillagerWrap" title="Click to meet someone new!">
+      <div class="matrix-villager-bubble" id="matrixVillagerBubble"></div>
+      <img class="matrix-villager-img" id="matrixVillagerImg" src="" alt="">
     </div>`;
+
+  // Re-attach villager events after DOM re-render
+  initMatrixVillager();
 }
 
 async function addMatrixTask(text, quadrant) {
@@ -662,7 +820,7 @@ async function closeTabOutDupes() {
 
 
 /* ----------------------------------------------------------------
-   SAVED FOR LATER ??? chrome.storage.local
+   SAVED FOR LATER ??? chrome.storage.sync
 
    Replaces the old server-side SQLite + REST API with Chrome's
    built-in key-value storage. Data persists across browser sessions
@@ -685,11 +843,20 @@ async function closeTabOutDupes() {
 /**
  * saveTabForLater(tab)
  *
- * Saves a single tab to the "Saved for Later" list in chrome.storage.local.
+ * Saves a single tab to the "Saved for Later" list in chrome.storage.sync.
  * @param {{ url: string, title: string }} tab
  */
+const DEFERRED_KEY = 'deferred';
+
+async function _loadDeferred() {
+  return (await storageGet(DEFERRED_KEY)) || [];
+}
+async function _saveDeferred(list) {
+  await storageSet(DEFERRED_KEY, list);
+}
+
 async function saveTabForLater(tab) {
-  const { deferred = [] } = await chrome.storage.local.get('deferred');
+  const deferred = await _loadDeferred();
   deferred.push({
     id:        Date.now().toString(),
     url:       tab.url,
@@ -698,18 +865,16 @@ async function saveTabForLater(tab) {
     completed: false,
     dismissed: false,
   });
-  await chrome.storage.local.set({ deferred });
+  await _saveDeferred(deferred);
 }
 
 /**
  * getSavedTabs()
  *
- * Returns all saved tabs from chrome.storage.local.
- * Filters out dismissed items (those are gone for good).
- * Splits into active (not completed) and archived (completed).
+ * Returns all saved tabs, split into active and archived.
  */
 async function getSavedTabs() {
-  const { deferred = [] } = await chrome.storage.local.get('deferred');
+  const deferred = await _loadDeferred();
   const visible = deferred.filter(t => !t.dismissed);
   return {
     active:   visible.filter(t => !t.completed),
@@ -718,31 +883,27 @@ async function getSavedTabs() {
 }
 
 /**
- * checkOffSavedTab(id)
- *
- * Marks a saved tab as completed (checked off). It moves to the archive.
+ * checkOffSavedTab(id)  -  marks a tab as completed ¡÷ moves to archive.
  */
 async function checkOffSavedTab(id) {
-  const { deferred = [] } = await chrome.storage.local.get('deferred');
+  const deferred = await _loadDeferred();
   const tab = deferred.find(t => t.id === id);
   if (tab) {
-    tab.completed = true;
+    tab.completed   = true;
     tab.completedAt = new Date().toISOString();
-    await chrome.storage.local.set({ deferred });
+    await _saveDeferred(deferred);
   }
 }
 
 /**
- * dismissSavedTab(id)
- *
- * Marks a saved tab as dismissed (removed from all lists).
+ * dismissSavedTab(id)  -  removes a tab from all lists.
  */
 async function dismissSavedTab(id) {
-  const { deferred = [] } = await chrome.storage.local.get('deferred');
+  const deferred = await _loadDeferred();
   const tab = deferred.find(t => t.id === id);
   if (tab) {
     tab.dismissed = true;
-    await chrome.storage.local.set({ deferred });
+    await _saveDeferred(deferred);
   }
 }
 
@@ -1087,6 +1248,11 @@ async function initWeather() {
     '\u{1F989} Blathers suggests: observe nature directly, hm~',
   ];
 
+  // Show AC-style striped Loading button while fetching
+  el.textContent = 'Loading...';
+  el.classList.add('is-loading');
+  el.style.display = 'block';
+
   try {
     const pos = await new Promise((resolve, reject) =>
       navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 })
@@ -1099,8 +1265,7 @@ async function initWeather() {
   } catch {
     el.textContent = acPick(FALLBACKS);
   }
-
-  el.style.display = 'block';
+  el.classList.remove('is-loading');
 }
 
 /**
@@ -1314,16 +1479,16 @@ const TAB_REASSIGN_KEY = 'tabReassignments';
 const GROUP_MERGE_KEY  = 'groupMerges';
 
 async function loadTabReassignments() {
-  try { return (await chrome.storage.local.get([TAB_REASSIGN_KEY]))[TAB_REASSIGN_KEY] || {}; } catch { return {}; }
+  return (await storageGet(TAB_REASSIGN_KEY)) || {};
 }
 async function saveTabReassignments(data) {
-  try { await chrome.storage.local.set({ [TAB_REASSIGN_KEY]: data }); } catch {}
+  await storageSet(TAB_REASSIGN_KEY, data);
 }
 async function loadGroupMerges() {
-  try { return (await chrome.storage.local.get([GROUP_MERGE_KEY]))[GROUP_MERGE_KEY] || []; } catch { return []; }
+  return (await storageGet(GROUP_MERGE_KEY)) || [];
 }
 async function saveGroupMerges(data) {
-  try { await chrome.storage.local.set({ [GROUP_MERGE_KEY]: data }); } catch {}
+  await storageSet(GROUP_MERGE_KEY, data);
 }
 
 async function reassignTab(url, targetDomain) {
@@ -1336,17 +1501,68 @@ async function mergeGroupDomains(domain1, domain2) {
   const merges = await loadGroupMerges();
   const m1 = merges.find(m => m.domains.includes(domain1));
   const m2 = merges.find(m => m.domains.includes(domain2));
+  let mergedDomains;
   if (m1 && m2 && m1 !== m2) {
     m1.domains.push(...m2.domains.filter(d => !m1.domains.includes(d)));
     merges.splice(merges.indexOf(m2), 1);
+    mergedDomains = m1.domains;
   } else if (m1) {
     if (!m1.domains.includes(domain2)) m1.domains.push(domain2);
+    mergedDomains = m1.domains;
   } else if (m2) {
     if (!m2.domains.includes(domain1)) m2.domains.push(domain1);
+    mergedDomains = m2.domains;
   } else {
-    merges.push({ id: Date.now().toString(36), domains: [domain1, domain2] });
+    const entry = { id: Date.now().toString(36), domains: [domain1, domain2] };
+    merges.push(entry);
+    mergedDomains = entry.domains;
   }
   await saveGroupMerges(merges);
+  // Mirror the merge as a Chrome tab group
+  await applyChromeMergeGroup(mergedDomains);
+  await incrementMetric('groupsMerged', 1);
+}
+
+/**
+ * applyChromeMergeGroup(domains)
+ *
+ * Finds all currently open tabs belonging to any of the given domains,
+ * groups them in Chrome with a matching colour, and names the group.
+ */
+async function applyChromeMergeGroup(domains) {
+  if (!chrome.tabs?.group || !chrome.tabGroups?.update) return;
+
+  // Map category ¡÷ Chrome tab group colour (limited palette)
+  const CAT_TO_CHROME_COLOR = {
+    work:'blue', school:'yellow', jobs:'orange', art:'pink',
+    social:'purple', relax:'green', dev:'cyan', finance:'green',
+    ai:'cyan', housing:'orange', health:'red', shopping:'yellow',
+  };
+
+  try {
+    const allTabs = await chrome.tabs.query({});
+    const tabIds = allTabs
+      .filter(t => {
+        try {
+          const host = new URL(t.url).hostname.replace(/^www\./, '');
+          return domains.some(d => host === d || host.endsWith('.' + d));
+        } catch { return false; }
+      })
+      .map(t => t.id);
+
+    if (tabIds.length < 1) return;
+
+    const groupId = await chrome.tabs.group({ tabIds });
+
+    // Pick a colour from the first domain's category
+    const firstCat = DOMAIN_CATEGORY_MAP[domains[0].replace(/^www\./, '')] || null;
+    const color = (firstCat && CAT_TO_CHROME_COLOR[firstCat]) || 'grey';
+    const title = domains.map(d => friendlyDomain(d)).join(' + ');
+
+    await chrome.tabGroups.update(groupId, { title, color });
+  } catch (err) {
+    console.warn('[tab-out] Chrome tab group update failed:', err);
+  }
 }
 
 async function unmergeGroup(mergeId) {
@@ -1643,7 +1859,7 @@ function renderDomainCard(group) {
 /**
  * renderDeferredColumn()
  *
- * Reads saved tabs from chrome.storage.local and renders the right-side
+ * Reads saved tabs from chrome.storage.sync and renders the right-side
  * "Saved for Later" checklist column. Shows active items as a checklist
  * and completed items in a collapsible archive.
  */
@@ -1907,6 +2123,12 @@ async function renderStaticDashboard() {
   const statTabs = document.getElementById('statTabs');
   if (statTabs) statTabs.textContent = openTabs.length;
 
+  // --- Metrics dashboard ---
+  await renderMetrics(openTabs.length);
+
+  // --- Increment session counter ---
+  await incrementMetric('sessions');
+
   // --- Check for duplicate Tab Out tabs ---
   checkTabOutDupes();
 
@@ -2041,8 +2263,10 @@ document.addEventListener('click', async (e) => {
     }
 
     // Update footer
+    await incrementMetric('tabsClosed', 1);
     const statTabs = document.getElementById('statTabs');
     if (statTabs) statTabs.textContent = openTabs.length;
+    await renderMetrics(openTabs.length);
 
     showToast('Tab closed');
     return;
@@ -2055,7 +2279,7 @@ document.addEventListener('click', async (e) => {
     const tabTitle = actionEl.dataset.tabTitle || tabUrl;
     if (!tabUrl) return;
 
-    // Save to chrome.storage.local
+    // Save to chrome.storage.sync
     try {
       await saveTabForLater({ url: tabUrl, title: tabTitle });
     } catch (err) {
@@ -2079,6 +2303,7 @@ document.addEventListener('click', async (e) => {
       setTimeout(() => chip.remove(), 200);
     }
 
+    await incrementMetric('tabsSaved', 1);
     showToast('Saved for later');
     await renderDeferredColumn();
     return;
@@ -2155,8 +2380,10 @@ document.addEventListener('click', async (e) => {
     const groupLabel = group.domain === '__landing-pages__' ? 'Homepages' : (group.label || friendlyDomain(group.domain));
     showToast(`Closed ${urls.length} tab${urls.length !== 1 ? 's' : ''} from ${groupLabel}`);
 
+    await incrementMetric('tabsClosed', urls.length);
     const statTabs = document.getElementById('statTabs');
     if (statTabs) statTabs.textContent = openTabs.length;
+    await renderMetrics(openTabs.length);
     return;
   }
 
@@ -2412,6 +2639,77 @@ document.addEventListener('keydown', async (e) => {
     if (hint) hint.style.opacity = '';
   }
 });
+
+
+/* ----------------------------------------------------------------
+   CLICK PARTICLE SHARDS
+   SVG geometric shards with colored borders that burst from every click.
+   ---------------------------------------------------------------- */
+(function initClickParticles() {
+  const COLORS = [
+    '#f8a6b2', '#889df0', '#f7cd67', '#82d5bb',
+    '#8ac68a', '#b77dee', '#e59266', '#19c8b9',
+    '#fc736d', '#6fba2c',
+  ];
+
+  // Each factory returns an SVG shape string with stroke = color
+  const SHAPES = [
+    c => `<polygon points="0,-7 5,4 -5,4"     fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.8" stroke-linejoin="round"/>`,
+    c => `<rect x="-3" y="-6" width="6" height="12" rx="1" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.8"/>`,
+    c => `<polygon points="0,-7 6,0 0,7 -6,0" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.8"/>`,
+    c => `<polygon points="-1.5,-8 1.5,-8 2.5,6 -2.5,6" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.8"/>`,
+    c => `<polygon points="0,-8 2,-2 8,-2 3,2 5,8 0,4 -5,8 -3,2 -8,-2 -2,-2" fill="rgba(255,255,255,0.15)" stroke="${c}" stroke-width="1.6"/>`,
+  ];
+
+  document.addEventListener('click', (e) => {
+    const count = 8 + Math.floor(Math.random() * 4); // 8¡V11 shards
+
+    for (let i = 0; i < count; i++) {
+      const color   = COLORS[Math.floor(Math.random() * COLORS.length)];
+      const shapeFn = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      const scale   = 0.7 + Math.random() * 0.8;
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      Object.assign(svg.style, {
+        position:      'fixed',
+        left:          e.clientX + 'px',
+        top:           e.clientY + 'px',
+        width:         '24px',
+        height:        '24px',
+        overflow:      'visible',
+        pointerEvents: 'none',
+        zIndex:        '999999',
+        willChange:    'transform, opacity',
+      });
+      svg.innerHTML = `<g transform="scale(${scale})">${shapeFn(color)}</g>`;
+      document.body.appendChild(svg);
+
+      // Physics: spread evenly around the click, with a slight upward bias
+      const angle   = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.9;
+      const speed   = 60 + Math.random() * 100;
+      const vx      = Math.cos(angle) * speed;
+      const vy      = Math.sin(angle) * speed - 40;
+      const gravity = 200;
+      const spin    = (Math.random() - 0.5) * 600;
+      const dur     = 500 + Math.random() * 300; // ms
+      const t0      = performance.now();
+
+      (function frame(now) {
+        const elapsed  = (now - t0) / 1000;         // seconds
+        const progress = (now - t0) / dur;           // 0 ¡÷ 1
+        if (progress >= 1) { svg.remove(); return; }
+
+        const px  = vx * elapsed;
+        const py  = vy * elapsed + 0.5 * gravity * elapsed * elapsed;
+        const rot = spin * elapsed;
+
+        svg.style.transform = `translate(${px}px, ${py}px) rotate(${rot}deg)`;
+        svg.style.opacity   = (1 - progress).toString();
+        requestAnimationFrame(frame);
+      })(t0);
+    }
+  });
+})();
 
 
 /* ----------------------------------------------------------------
