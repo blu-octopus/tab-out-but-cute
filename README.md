@@ -1,8 +1,8 @@
 # Island Tab Manager
 
 > *"Are you someone who is highkey more productive when a friendly shopkeeper keeps pushing you for bells? 
-Now you can be your own shopkeeper every day! 
-All the while you get to manage your tabs better while you're at it, yes yes!"*
+> Now you can be your own shopkeeper every day! 
+> All the while you get to manage your tabs better while you're at it, yes yes!"*
 
 **Island Tab Manager** is a cozy island-life?Vthemed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain. You get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score ?X all wrapped in a warm, rounded island aesthetic.
 
@@ -23,7 +23,7 @@ All the while you get to manage your tabs better while you're at it, yes yes!"*
 2. Open **`[chrome://extensions](chrome://extensions/)`** (or `edge://extensions`)
 3. Toggle **Developer mode** on (top-right corner)
 4. Click **Load unpacked** and select the unzipped folder -> **Open**
-![chrome://extensions ¡X Load unpacked](extension/assets/instruction-image-2.png)
+![chrome://extensions Â¡X Load unpacked](extension/assets/instruction-image-2.png)
 5. Open a new tab, and it's there! Bam! 
 
 > **Tip:** Pin the extension icon from the menu so it's always one click away.
