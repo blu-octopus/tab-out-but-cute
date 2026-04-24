@@ -26,8 +26,9 @@ Manage your tabs better while you're at it, yes yes ?
 2. Open **`chrome://extensions`** (or `edge://extensions`)
 3. Toggle **Developer mode** on (top-right corner)
 4. Click **Load unpacked** and select the unzipped folder -> **Open**
-![chrome://extensions ?X Load unpacked](extension/assets/instruction-image-2.png)
 5. Open a new tab, and it's there! Bam! 
+
+![chrome://extensions ?X Load unpacked](extension/assets/instruction-image-2.png)
 
 > **Tip:** Pin the extension icon from the menu so it's always one click away.
 
