@@ -1,11 +1,11 @@
 # Island Tab Manager
 
-> *Are you someone who is highkey more productive when a friendly shopkeeper keeps pushing you for bells? *
-> Now you can be your own shopkeeper every day!
+> Are you someone who is highkey more productive when a friendly shopkeeper keeps pushing you for bells?
 
-> Manage your tabs better while you're at it, yes yes!
+Now you can be your own shopkeeper every day!
+Manage your tabs better while you're at it, yes yes ✨
 
-**Island Tab Manager** is a cozy island-life?Vthemed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain. You get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score ?X all wrapped in a warm, rounded island aesthetic.
+**Island Tab Manager** is a cozy island-life themed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain. You get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score all in a warm, rounded island aesthetic.
 
 > **Chrome / Edge only.** This extension uses Chrome Manifest V3 APIs (`chrome.tabs`, `chrome.storage.sync`, `chrome.tabGroups`). Firefox is not supported.
 
@@ -36,8 +36,6 @@
 For version update, repeat Step 1 for a new ZIP:
 1. Unzip it, **replacing** the existing folder
 2. Go to `chrome://extensions, click the **refresh** icon on the Island Tab Manager card
-
----
 
 ---
 
@@ -131,7 +129,7 @@ Island Tab Manager uses **`chrome.storage.sync`**:
 
 ## Licence
 
-The **code** is MIT ?X same as the original Tab Out by Zara.
+The **code** is MIT, same as the original Tab Out by Zara.
 
 The **villager GIF assets** are fan-captured clips used for personal, non-commercial purposes only.
 
