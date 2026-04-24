@@ -604,7 +604,7 @@ function showAtMentionDropdown(input) {
 
   dropdown.innerHTML = options.slice(0, 8).map(opt => {
     const fav = opt.domain
-      ? `<img class="at-favicon" src="https://www.google.com/s2/favicons?domain=${esc(opt.domain)}&sz=16" onerror="this.style.opacity=0" alt="">`
+      ? `<img class="at-favicon" src="https://www.google.com/s2/favicons?domain=${esc(opt.domain)}&sz=16" data-img-fallback="hide" alt="">`
       : '';
     const badge = opt.type === 'group'
       ? `<span class="at-mention-badge">${opt.count} tab${opt.count !== 1 ? 's' : ''}</span>`
@@ -1790,7 +1790,7 @@ function buildOverflowChips(hiddenTabs, urlCounts = {}, sourceDomain = '') {
          draggable="true"
          data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
          data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(sourceDomain)}">
-      <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" onerror="this.src='icons/leaf-favicon.svg'">
+      <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" data-img-fallback="leaf">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
         <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="Save for later">
@@ -1873,7 +1873,7 @@ function renderDomainCard(group) {
          draggable="true"
          data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
          data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(group.domain)}">
-      <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" onerror="this.src='icons/leaf-favicon.svg'">
+      <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" data-img-fallback="leaf">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
         <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="Save for later">
@@ -2026,7 +2026,7 @@ function renderDeferredItem(item) {
       <input type="checkbox" class="deferred-checkbox" data-action="check-deferred" data-deferred-id="${item.id}">
       <div class="deferred-info">
         <a href="${item.url}" target="_blank" rel="noopener" class="deferred-title" title="${(item.title || '').replace(/"/g, '&quot;')}">
-          <img src="${faviconUrl}" alt="" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px" onerror="this.style.display='none'">${item.title || item.url}
+          <img src="${faviconUrl}" alt="" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px" data-img-fallback="hide">${item.title || item.url}
         </a>
         <div class="deferred-meta">
           <span>${domain}</span>
@@ -2796,6 +2796,25 @@ document.addEventListener('keydown', async (e) => {
    CLICK PARTICLE SHARDS
    SVG geometric shards with colored borders that burst from every click.
    ---------------------------------------------------------------- */
+/* ================================================================
+   IMAGE ERROR FALLBACKS
+   Replaces all inline onerror= handlers (blocked by CSP).
+   data-img-fallback="leaf"  ¡÷ swap src to the leaf placeholder
+   data-img-fallback="hide"  ¡÷ hide the image
+   ================================================================ */
+document.addEventListener('error', e => {
+  const img = e.target;
+  if (img.tagName !== 'IMG') return;
+  const fb = img.dataset.imgFallback;
+  if (fb === 'leaf') {
+    img.removeAttribute('data-img-fallback'); // prevent infinite loop
+    img.src = 'icons/leaf-favicon.svg';
+  } else if (fb === 'hide') {
+    img.style.opacity = '0';
+    img.style.pointerEvents = 'none';
+  }
+}, true /* capture so it catches errors in dynamic subtrees */);
+
 (function initClickParticles() {
   const COLORS = [
     '#f8a6b2', '#889df0', '#f7cd67', '#82d5bb',
