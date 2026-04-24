@@ -1,9 +1,9 @@
 # Island Tab Manager
 
 > *"Are you someone who is highkey more productive when a friendly shopkeeper keeps pushing you for bells? 
-> Now you can be your own shopkeeper every day!
+> Now you can be your own shopkeeper every day!*
 
-> All the while you get to manage your tabs better while you're at it, yes yes!"*
+> All the while you get to manage your tabs better while you're at it, yes yes!"
 
 **Island Tab Manager** is a cozy island-life?Vthemed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain. You get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score ?X all wrapped in a warm, rounded island aesthetic.
 
