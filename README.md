@@ -32,6 +32,8 @@ Manage your tabs better while you're at it, yes yes ?
 
 > **Tip:** Pin the extension icon from the menu so it's always one click away.
 
+[Submit your feedback here](https://forms.gle/RRjReF9jY4wkJAKaA)
+
 ---
 
 ### Updating
