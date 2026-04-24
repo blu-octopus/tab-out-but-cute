@@ -3,14 +3,14 @@
 > Are you someone who is highkey more productive when a friendly shopkeeper keeps pushing you for bells?
 
 Now you can be your own shopkeeper every day!
-Manage your tabs better while you're at it, yes yes ✨
+Manage your tabs better while you're at it, yes yes ?
 
 **Island Tab Manager** is a cozy island-life themed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain. You get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score all in a warm, rounded island aesthetic.
 
 > **Chrome / Edge only.** This extension uses Chrome Manifest V3 APIs (`chrome.tabs`, `chrome.storage.sync`, `chrome.tabGroups`). Firefox is not supported.
-![Extension Preview](extension/assets/extension-preview.png)
 
-## How to Download
+
+## How to Add this Extension
 
 ### Step 1 Download
 1. Press the Green "Code" button
@@ -24,7 +24,7 @@ Manage your tabs better while you're at it, yes yes ✨
 2. Open **`[chrome://extensions](chrome://extensions/)`** (or `edge://extensions`)
 3. Toggle **Developer mode** on (top-right corner)
 4. Click **Load unpacked** and select the unzipped folder -> **Open**
-![chrome://extensions ¡X Load unpacked](extension/assets/instruction-image-2.png)
+![chrome://extensions ?X Load unpacked](extension/assets/instruction-image-2.png)
 5. Open a new tab, and it's there! Bam! 
 
 > **Tip:** Pin the extension icon from the menu so it's always one click away.
@@ -42,33 +42,33 @@ For version update, repeat Step 1 for a new ZIP:
 ## Features
 
 ### Tab management
-- **See all your tabs at a glance** ?X clean grid, grouped by domain
-- **Color-coded categories** ?X work, school, jobs, social, dev, art, and more, each with a distinct accent color
-- **Close tabs with style** ?X satisfying swoosh sound + confetti burst
-- **Duplicate detection** ?X one-click cleanup for tabs you have open twice
-- **Save for later** ?X bookmark a tab to a checklist before closing it
+- **See all your tabs at a glance** clean grid, grouped by domain
+- **Color-coded categories** work, school, jobs, social, dev, art, and more, each with a distinct accent color
+- **Close tabs with style** satisfying swoosh sound + confetti burst
+- **Duplicate detection** one-click cleanup for tabs you have open twice
+- **Save for later** bookmark a tab to a checklist before closing it
 - **Click any tab to jump to it** across windows, no new tab opened
-- **Drag tabs between groups** ?X reorganise cards by dragging chips
-- **Merge groups by drag-hold** ?X combine two domain cards; they shake and fuse
+- **Drag tabs between groups** reorganise cards by dragging chips
+- **Merge groups by drag-hold** combine two domain cards; they shake and fuse
 
 ### Dynamic greetings & weather
-- **Time-aware greetings** ?X morning, afternoon, evening, and night, each with rotating island dialogue
-- **Live weather** via [Open-Meteo](https://open-meteo.com/) ?X rendered as a cozy island weather report
+- **Time-aware greetings** morning, afternoon, evening, and night, each with rotating island dialogue
+- **Live weather** via [Open-Meteo](https://open-meteo.com/) rendered as a cozy island weather report
 
-### o-Do (Eisenhower Matrix)
-- **Four quadrants** ?X Do, Schedule, Delegate, Cut ?X so you can prioritise like a productive islander
-- **Click any row to check/uncheck** ?X no tiny checkbox hunting
-- **Hover to delete** ?X same interaction as closing a tab chip
-- **@ mention tabs** ?X type `@` in the task input to link a task to an open tab group
-- **Persistent** ?X tasks survive browser restarts via `chrome.storage.sync` + `localStorage` fallback
+### To-Do (Eisenhower Matrix)
+- **Four quadrants** Do, Schedule, Delegate, Cut so you can prioritise like a productive islander
+- **Click any row to check/uncheck** no tiny checkbox hunting
+- **Hover to delete** same interaction as closing a tab chip
+- **@ mention tabs** type `@` in the task input to link a task to an open tab group
+- **Persistent** tasks survive browser restarts via `chrome.storage.sync` + `localStorage` fallback
 
 ### Tab Health Heads Up Display
-- **Real-time score (0?V100)** based on how organised your tabs are
+- **Real-time score (0-100)** based on how organised your tabs are
 - **S** Island Points Earned
 - Score goes up when you use the matrix, merge groups, and save tabs for later
 
 ### Cozy extras
-- Dancing island villager GIFs near the footer. Xlick to cycle characters, hover for in-character dialogue
+- Dancing island villager GIFs near the footer. Click to cycle characters, hover for in-character dialogue
 - Click-anywhere SVG particle burst effect
 - Custom finger cursor and leaf header decoration
 - Ocean wave SVG footer
@@ -80,12 +80,12 @@ For version update, repeat Step 1 for a new ZIP:
 Island Tab Manager uses **`chrome.storage.sync`**:
 
 - Your to-do tasks, saved tabs, and group merges **follow your Chrome profile** across signed-in devices automatically
-- Data survives browser restarts and tab closes
+- Data survives browser restarts and tab closures
 - If Chrome sync is off, a `localStorage` fallback keeps data local ?X nothing is lost, but it won't move between machines
 
 ---
 
-## ? Privacy
+## Privacy
 
 **Island Tab Manager collects zero data.**
 
@@ -101,14 +101,14 @@ Island Tab Manager uses **`chrome.storage.sync`**:
 
 ---
 
-## ? Credits
+## Credits
 
 | What | Who |
 |------|-----|
 | **Put together by** | [blu-octopus (me!)](https://github.com/blu-octopus) |
-| **Tab Out** ?X original tab management concept, logic & architecture | [Zara](https://x.com/zarazhangrui) ?P [github.com/zarazhangrui/tab-out](https://github.com/zarazhangrui/tab-out) |
-| **Island UI design system** ?X cozy island aesthetic & component library | [guokaigdg](https://github.com/guokaigdg) ?P [animal-island-ui](https://github.com/guokaigdg/animal-island-ui) |
-| **Weather data** | [Open-Meteo](https://open-meteo.com/) ?X free, open-source, no API key |
+| **Tab Out** original tab management concept, logic & architecture | [Zara](https://x.com/zarazhangrui) - [github.com/zarazhangrui/tab-out](https://github.com/zarazhangrui/tab-out) |
+| **Island UI design system** cozy island aesthetic & component library | [guokaigdg](https://github.com/guokaigdg) - [animal-island-ui](https://github.com/guokaigdg/animal-island-ui) |
+| **Weather data** | [Open-Meteo](https://open-meteo.com/) - free, open-source, no API key |
 > If you love the original Tab Out, go star [Zara's repo](https://github.com/zarazhangrui/tab-out). If you love the island UI design, go star [guokaigdg's component library](https://github.com/guokaigdg/animal-island-ui). They deserve the bells, yes yes!
 
 ---
