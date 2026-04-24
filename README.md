@@ -8,7 +8,7 @@ Manage your tabs better while you're at it, yes yes ✨
 **Island Tab Manager** is a cozy island-life themed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain. You get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score all in a warm, rounded island aesthetic.
 
 > **Chrome / Edge only.** This extension uses Chrome Manifest V3 APIs (`chrome.tabs`, `chrome.storage.sync`, `chrome.tabGroups`). Firefox is not supported.
-
+![Extension Preview](extension/assets/extension-preview.png)
 
 ## How to Download
 
