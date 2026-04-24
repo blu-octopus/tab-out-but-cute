@@ -44,7 +44,43 @@
 
 ---
 
-## ? Share with Friends ¡X ZIP Method
+## Install from this repo (quickest way)
+
+If you have the repo cloned already, you can load it directly into Chrome ¡X no ZIP needed.
+
+### Step 1 ¡X Clone the repo
+
+```bash
+git clone https://github.com/blu-octopus/tab-out-but-cute.git
+```
+
+Or click **Code > Download ZIP** on GitHub, then unzip it somewhere permanent (e.g. `~/tab-out-but-cute/`).
+
+> **Note:** Do not move or delete the folder after loading. Chrome loads the extension live from that folder ¡X if you delete it, the extension stops working.
+
+### Step 2 ¡X Load it in Chrome
+
+1. Open **`chrome://extensions`** in your address bar
+2. Toggle **Developer mode** on (top-right corner)
+3. Click **Load unpacked**
+4. Navigate into the cloned folder and select the **`extension/`** subfolder, then click **Open**
+
+Open a new tab ¡X you should see the Island Tab Manager dashboard right away.
+
+### Step 3 ¡X Keeping it up to date
+
+When new changes are pushed, pull them and reload:
+
+```bash
+cd tab-out-but-cute
+git pull
+```
+
+Then go to `chrome://extensions` and click the **refresh icon** on the Island Tab Manager card.
+
+---
+
+## Share with Friends ¡X ZIP Method
 
 ### Step 1 ¡X Create the ZIP
 
