@@ -1,134 +1,142 @@
-# Tab Out ? but cute
+# ? Island Tab Manager
 
-> *"Are you someone who is highkey more productive and committed when Tom Nook kept asking you for bells? Well, now you can be your own Tom Nook every day ¡X and manage your tabs better while you're at it, yes yes!"*
+> *"Are you someone who is highkey more productive when a friendly shopkeeper keeps asking you for bells? Now you can be your own shopkeeper every day ¡X and manage your tabs better while you're at it, yes yes!"*
 
-**Tab Out but cute** is a restyled Chrome new-tab extension that replaces your new tab page with an Animal Crossing-themed dashboard of everything you have open. Tabs are grouped by domain, you get a time-aware AC-villager greeting, live weather, and a built-in to-do list ¡X all with a cozy island aesthetic.
+**Island Tab Manager** is a cozy island-life¡Vthemed Chrome new-tab extension that replaces your new-tab page with a dashboard of everything you have open. Tabs are grouped by domain, you get time-aware island villager greetings, live weather, a built-in Eisenhower matrix to-do list, and a tab health score ¡X all wrapped in a warm, rounded island aesthetic.
 
-> **Chrome only.** This extension uses Chrome Manifest V3 APIs (`chrome.tabs`, `chrome.storage`, `chrome.runtime`) that are specific to Chromium-based browsers. It works in **Chrome** and **Microsoft Edge**. Firefox is not currently supported.
+> **Chrome / Edge only.** This extension uses Chrome Manifest V3 APIs (`chrome.tabs`, `chrome.storage.sync`, `chrome.tabGroups`). Firefox is not supported.
 
 ---
 
 ## ? Features
 
 ### ?? Tab management
-- **See all your tabs at a glance** ¡X clean grid, grouped by domain, so you can finally face the chaos
-- **Homepage grouping** ¡X Gmail, X, YouTube, LinkedIn, and GitHub homepages get their own card so they don't clutter your real work
-- **Color-coded categories** ¡X jobs, school, social, dev, and more each get a distinct accent color
-- **Close tabs with style** ¡X satisfying swoosh sound + confetti burst, because you earned it
-- **Duplicate detection** ¡X flags pages you have open twice with one-click cleanup
-- **Click any tab to jump to it** ¡X across windows, no new tab opened
-- **Save for later** ¡X bookmark a tab to a checklist before closing it, so nothing slips through
-- **Localhost grouping** ¡X shows port numbers so you can tell your vibe-coding projects apart
-- **Expandable groups** ¡X first 8 tabs visible, "+N more" to expand
+- **See all your tabs at a glance** ¡X clean grid, grouped by domain
+- **Color-coded categories** ¡X work, school, jobs, social, dev, art, and more, each with a distinct accent color
+- **Close tabs with style** ¡X satisfying swoosh sound + confetti burst
+- **Duplicate detection** ¡X one-click cleanup for tabs you have open twice
+- **Save for later** ¡X bookmark a tab to a checklist before closing it
+- **Click any tab to jump to it** across windows, no new tab opened
+- **Drag tabs between groups** ¡X reorganise cards by dragging chips
+- **Merge groups by drag-hold** ¡X combine two domain cards; they shake and fuse
 
-### ? Animal Crossing greetings
-- **Time-aware greetings** ¡X "Good morning!", "Good afternoon!", "Good evening!", "Good night~"
-- **Rotating Tom Nook dialogue** ¡X a different villager one-liner every hour ("Check your mailbox ¡X packages waiting, hm?" / "The shooting stars are lovely tonight, yes yes!")
-- **Live weather** ¡X fetches real conditions from [Open-Meteo](https://open-meteo.com/) using your location and renders them in AC style ("?? 80% chance of rain! Grab that umbrella, yes yes!")
+### ?? Dynamic greetings & weather
+- **Time-aware greetings** ¡X morning, afternoon, evening, and night, each with rotating island dialogue
+- **Live weather** via [Open-Meteo](https://open-meteo.com/) ¡X rendered as a cozy island weather report
 
 ### ? To-Do (Eisenhower Matrix)
-- **Four quadrants** ¡X Do, Schedule, Delegate, Cut ¡X so you can prioritize like Isabelle on a crunch day
-- **Click any task row to check/uncheck** ¡X no tiny checkbox hunting required
-- **Hover to delete** ¡X same X-button interaction as closing a tab
-- **@ mention tabs** ¡X type `@` in the task input for an autofill dropdown of your open tab groups and individual tabs, so you can link tasks directly to what you have open
-- **"enter to add" hint** ¡X because sometimes the UI just needs to tell you what to do
+- **Four quadrants** ¡X Do, Schedule, Delegate, Cut ¡X so you can prioritise like a productive islander
+- **Click any row to check/uncheck** ¡X no tiny checkbox hunting
+- **Hover to delete** ¡X same interaction as closing a tab chip
+- **@ mention tabs** ¡X type `@` in the task input to link a task to an open tab group
+- **Persistent** ¡X tasks survive browser restarts via `chrome.storage.sync` + `localStorage` fallback
+
+### ? Tab Health HUD
+- **Real-time score (0¡V100)** based on how organised your tabs are
+- **S** Island Points Earned ¡÷ **D** Island in Chaos
+- Score goes up when you use the matrix, merge groups, and save tabs for later
 
 ### ? Cozy extras
-- **Ocean wave footer** with swimming capybaras, fish, coral, and a sailboat
-- **Leaf cursor** ¡X the whole extension uses a custom finger cursor
-- **100% local** ¡X your data never leaves your machine
-- **No server, no npm, no account** ¡X pure Chrome extension
+- Dancing island villager GIFs near the footer ¡X click to cycle characters, hover for in-character dialogue
+- Click-anywhere SVG particle burst effect
+- Custom finger cursor and leaf header decoration
+- Ocean wave SVG footer
 
 ---
 
-## ? Installation (Chrome / Edge)
+## ? Share with Friends ¡X ZIP Method
 
-### Option A ¡X Load from this repo (recommended)
+### Step 1 ¡X Create the ZIP
 
-**1. Download or clone this repo**
+Run the included script from the repo root:
 
 ```bash
-git clone https://github.com/zarazhangrui/tab-out.git
-# or download the ZIP from GitHub ¡÷ Code ¡÷ Download ZIP
+bash pack.sh
 ```
 
-**2. Open your browser's extension page**
+This creates `IslandTabManager.zip` (excludes junk files automatically).
 
-| Browser | URL to visit |
-|---------|-------------|
-| Chrome  | `chrome://extensions` |
-| Edge    | `edge://extensions` |
-
-**3. Enable Developer Mode**
-
-Toggle **Developer mode** on (top-right corner of the extensions page).
-
-**4. Load the extension**
-
-1. Click **Load unpacked**
-2. Navigate to the `extension/` folder inside the cloned/unzipped repo
-3. Select that folder and click **Open**
-
-**5. Open a new tab**
-
-That's it ¡X Tom Nook is now watching over your tabs, hm hm!
-
-> ? **Tip:** Pin the extension icon from the puzzle-piece menu so you can click it to open a new tab anytime.
-
----
-
-### Option B ¡X Use a coding agent
-
-Send your coding agent (Claude, Codex, Cursor, etc.) this repo URL and say **"install this Chrome extension"**:
-
-```
-https://github.com/zarazhangrui/tab-out
-```
-
-The agent will walk you through the steps. Takes about 1 minute.
-
----
-
-### Keeping it updated
-
-Since this is a local unpacked extension, updates don't happen automatically. To update:
-
+**Manual alternative on Mac:**
 ```bash
-git pull
+zip -r IslandTabManager.zip extension/ --exclude "*.DS_Store" --exclude "__MACOSX/*"
 ```
 
-Then go back to `chrome://extensions` and click the **? refresh icon** on the Tab Out card.
+**Manual alternative on Windows (PowerShell):**
+```powershell
+Compress-Archive -Path .\extension\* -DestinationPath IslandTabManager.zip
+```
+
+---
+
+### Step 2 ¡X Your friend installs it
+
+Send `IslandTabManager.zip` with these instructions:
+
+1. **Unzip** into a permanent folder (e.g. `~/IslandTabManager/`). Don't delete this folder ¡X Chrome needs it loaded.
+2. Open **`chrome://extensions`** (or `edge://extensions`)
+3. Toggle **Developer mode** on (top-right corner)
+4. Click **Load unpacked** ¡÷ select the unzipped folder ¡÷ **Open**
+5. Open a new tab ¡X done! ?
+
+> ? **Tip:** Pin the extension icon from the ? menu so it's always one click away.
+
+---
+
+### Updating
+
+When you get a new ZIP:
+1. Unzip it, **replacing** the existing folder
+2. Go to `chrome://extensions` ¡÷ click the **? refresh** icon on the Island Tab Manager card
+
+---
+
+## ? Data across devices
+
+Island Tab Manager uses **`chrome.storage.sync`**:
+
+- ? Your to-do tasks, saved tabs, and group merges **follow your Chrome profile** across signed-in devices automatically
+- ? Data survives browser restarts and tab closes
+- ?? If Chrome sync is off, a `localStorage` fallback keeps data local ¡X nothing is lost, but it won't move between machines
+
+---
+
+## ? Publishing to the Chrome Web Store
+
+To distribute officially you would need to:
+
+1. **Replace the villager GIF assets** with original artwork or properly licensed assets (required for store approval)
+2. Create a developer account ¡X one-time $5 fee at [chrome.google.com/webstore/devconsole](https://chrome.google.com/webstore/devconsole)
+3. ZIP the `extension/` folder contents (same as above)
+4. Submit for review ¡X Google reviews typically take 1¡V3 business days
 
 ---
 
 ## ? Privacy
 
-**Tab Out collects absolutely no data. Here's exactly what it can and cannot do:**
+**Island Tab Manager collects zero data.**
 
-| Permission | Why it's needed | What it does NOT do |
-|-----------|-----------------|---------------------|
-| `tabs` | Read your open tab titles and URLs to build the dashboard | Never sends tab data anywhere |
-| `storage` | Save your To-Do tasks and "Saved for later" tabs locally | Data stays in `chrome.storage.local` on your device only |
-| `activeTab` | Switch focus to a tab when you click it | Cannot access tab content |
-| `geolocation` | Fetch local weather from Open-Meteo | Your coordinates are sent only to [Open-Meteo](https://open-meteo.com/), a free, open-source weather API ¡X no account, no tracking |
+| Permission | Why | What it does NOT do |
+|-----------|-----|---------------------|
+| `tabs` | Read open tab titles & URLs to build the dashboard | Never sends tab data anywhere |
+| `storage` | Save tasks & saved tabs via `chrome.storage.sync` | Data stays in your Chrome profile only |
+| `activeTab` | Switch focus to a tab when you click it | Cannot read or modify tab content |
+| `geolocation` | Fetch local weather | Coordinates go only to [Open-Meteo](https://open-meteo.com/) ¡X free, open-source, no account |
+| `tabGroups` | Auto-group tabs in Chrome when merging groups | Only affects your own browser |
 
-**No analytics. No ads. No external servers beyond the weather API. No data is sold, shared, or stored remotely ¡X ever.**
-
-Your to-do list and saved tabs live entirely in your browser's local storage. Uninstalling the extension removes all stored data.
+**No analytics. No ads. No external servers beyond Open-Meteo. Data is never sold, shared, or stored remotely.**
 
 ---
 
 ## ? Credits
 
-This project stands on the shoulders of some great work:
-
 | What | Who |
 |------|-----|
-| **Tab Out** ¡X original extension concept, tab management logic, and architecture | [Zara](https://x.com/zarazhangrui) ¡P [github.com/zarazhangrui/tab-out](https://github.com/zarazhangrui/tab-out) |
-| **Animal Crossing UI** ¡X design system, component library, and island aesthetic inspiration | [guokaigdg](https://github.com/guokaigdg) ¡P [animal-island-ui](https://github.com/guokaigdg/animal-island-ui) |
-| **Weather data** | [Open-Meteo](https://open-meteo.com/) ¡X free, open-source, no API key required |
+| **Tab Out** ¡X original tab management concept, logic & architecture | [Zara](https://x.com/zarazhangrui) ¡P [github.com/zarazhangrui/tab-out](https://github.com/zarazhangrui/tab-out) |
+| **Island UI design system** ¡X cozy island aesthetic & component library | [guokaigdg](https://github.com/guokaigdg) ¡P [animal-island-ui](https://github.com/guokaigdg/animal-island-ui) |
+| **Put together by** | [blu-octopus](https://github.com/blu-octopus) |
+| **Weather data** | [Open-Meteo](https://open-meteo.com/) ¡X free, open-source, no API key |
 
-> If you love the original Tab Out, go star [Zara's repo](https://github.com/zarazhangrui/tab-out). If you love the Animal Crossing aesthetic, go star [guokaigdg's component library](https://github.com/guokaigdg/animal-island-ui). They both deserve the bells, yes yes! ?
+> If you love the original Tab Out, go star [Zara's repo](https://github.com/zarazhangrui/tab-out). If you love the island UI design, go star [guokaigdg's component library](https://github.com/guokaigdg/animal-island-ui). They deserve the bells, yes yes! ?
 
 ---
 
@@ -137,17 +145,19 @@ This project stands on the shoulders of some great work:
 | What | How |
 |------|-----|
 | Extension runtime | Chrome Manifest V3 |
-| Storage | `chrome.storage.local` |
-| Sound | Web Audio API (synthesized, no audio files) |
-| Animations | CSS transitions + JS confetti particles |
-| Weather | [Open-Meteo API](https://open-meteo.com/) (free, no key) |
-| Design | Animal Island UI by guokaigdg |
+| Storage | `chrome.storage.sync` + `localStorage` fallback |
+| Sound | Web Audio API (synthesised ¡X no audio files) |
+| Animations | CSS transitions + JS particle shards on click |
+| Weather | [Open-Meteo API](https://open-meteo.com/) (free, no key required) |
+| Design inspiration | [Island UI by guokaigdg](https://github.com/guokaigdg/animal-island-ui) |
 | Font | Nunito (Google Fonts) |
 
 ---
 
-## License
+## ? Licence
 
-MIT ¡X same as the original Tab Out.
+The **code** is MIT ¡X same as the original Tab Out by Zara.
 
-Do whatever you want, but please keep the credits in place. Tom Nook believes in fair trade, hm!
+The **villager GIF assets** are fan-captured clips used for personal, non-commercial purposes only. They must be replaced with original art before any public distribution.
+
+Please keep credits intact. The shopkeeper believes in fair trade, hm hm! ?

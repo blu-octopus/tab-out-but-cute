@@ -195,11 +195,11 @@ async function computeTabScore(openTabCount, windowCount) {
 }
 
 function getScoreRating(score) {
-  if (score >= 90) return { grade: 'S',  label: 'Nook Miles Earned!',  color: '#6fba2c' };
+  if (score >= 90) return { grade: 'S',  label: 'Island Points Earned!',  color: '#6fba2c' };
   if (score >= 75) return { grade: 'A',  label: 'Resident Rep.',       color: '#19c8b9' };
   if (score >= 55) return { grade: 'B',  label: 'Still Settling In',   color: '#f7cd67' };
   if (score >= 35) return { grade: 'C',  label: 'Behind on Rent',      color: '#e59266' };
-  return                  { grade: 'D',  label: 'Isabelle Needs Help', color: '#fc736d' };
+  return                  { grade: 'D',  label: 'Island in Chaos', color: '#fc736d' };
 }
 
 async function renderMetrics(openTabCount) {
@@ -284,9 +284,9 @@ const VILLAGER_CAST = [
     ]
   },
   {
-    file: 'isabelle.gif', name: 'Isabelle',
+    file: 'isabelle.gif', name: 'The Secretary',
     lines: [
-      'Oh! Tom Nook said I could take a short break...',
+      'Oh! The shopkeeper said I could take a short break...',
       'Just one more song! Then back to the reports!',
       'Everything is just wonderful, sir/ma\'am!',
     ]
@@ -303,7 +303,7 @@ const VILLAGER_CAST = [
     file: 'mrksza.gif', name: 'Villager',
     lines: [
       'Best. Day. Ever!',
-      'Nook miles, here I come!',
+      'Island points, here I come!',
       'Living my best island life right now!',
     ]
   },
@@ -350,9 +350,9 @@ const VILLAGER_CAST = [
   {
     file: 'villager.gif', name: 'Villager',
     lines: [
-      'Nook miles... here I come!',
+      'Island points... here I come!',
       'Island life is the best life!',
-      'Tom Nook would be so proud right now, yes yes!',
+      'The shopkeeper would be so proud right now, yes yes!',
     ]
   },
 ];
@@ -969,7 +969,7 @@ function playCloseSound() {
  * Pure CSS + JS, no libraries.
  */
 function shootConfetti(x, y) {
-  // NookPhone app palette  - Animal Crossing style
+  // Cozy island app palette
   const colors = [
     '#19c8b9', // mint teal
     '#6fba2c', // leaf green
@@ -1119,9 +1119,9 @@ function timeAgo(dateStr) {
 }
 
 /* ================================================================
-   AC-STYLE GREETING + WEATHER
+   ISLAND GREETING + WEATHER
    Uses Open-Meteo (free, no API key) + browser geolocation.
-   All dialogue is written in Tom Nook / villager cadence.
+   All dialogue is written in cozy island villager cadence.
    ================================================================ */
 
 // Seeded pick: changes every hour so refresh doesn't flicker the message
@@ -1136,40 +1136,40 @@ const AC_LINES = {
     'Rise and shine, yes yes!',
     'Up bright and early, hm~',
     "Don't forget to water your flowers, hm?",
-    "Isabelle says good morning, yes yes!",
-    'A brand-new day in the village, hm hm!',
+    "The secretary says good morning, yes yes!",
+    'A brand-new day on the island, hm hm!',
     'The early bird catches the sea bass, yes yes!',
     'Morning! Check the bulletin board, hm?',
   ],
   afternoon: [
     'Turnip prices are in, yes yes!',
-    'The Able Sisters are open, hm~',
+    'The tailor shop is open, hm~',
     'Perfect day for the museum, yes yes!',
     'Have you caught any rare fish today, hm?',
     "Afternoon! Don't let the day slip by, hm hm!",
-    'A fine afternoon in the village, yes yes!',
-    'Check your mailbox  - packages waiting, hm?',
+    'A fine afternoon on the island, yes yes!',
+    'Check your mailbox \u2014 packages waiting, hm?',
   ],
   evening: [
-    'K.K. Slider plays on Saturdays, yes yes!',
+    'The travelling musician plays tonight, yes yes!',
     'The stars come out soon, hm~',
     "Don't forget to check your mail, hm?",
     'Evening strolls are the best, yes yes!',
-    'Celeste might be out tonight, hm hm!',
-    'A peaceful evening in the village, yes yes!',
+    'Maybe catch a shooting star tonight, hm hm!',
+    'A peaceful evening on the island, yes yes!',
   ],
   night: [
-    'Up late, hm hm? Even Nook Inc. rests!',
+    'Up late, hm hm? Even the shopkeeper rests!',
     'The shooting stars are lovely tonight, yes yes!',
-    'Still awake? Blathers approves, hm~',
+    'Still awake? The night-owl curator approves, hm~',
     'Night owl energy, yes yes! hm hm!',
     "Past bedtime, hm... but who's counting?",
-    'Even Tom Nook sleeps eventually, hm~',
+    'Even the shopkeeper sleeps eventually, hm~',
   ],
 };
 
 /**
- * getGreeting()  - time-based greeting, AC style
+ * getGreeting()  - time-based greeting, island style
  */
 function getGreeting() {
   const h = new Date().getHours();
@@ -1180,7 +1180,7 @@ function getGreeting() {
 }
 
 /**
- * getGreetingSub()  - rotating AC villager dialogue for the current time slot
+ * getGreetingSub  - rotating island villager dialogue for the current time slot
  */
 function getGreetingSub() {
   const h = new Date().getHours();
@@ -1225,7 +1225,7 @@ function buildWeatherLine(code, pct, tempF) {
       : `${pct}% chance of rain today, hm~ maybe bring a brolly!`;
   }
   else if (code <= 77 || (code >= 85 && code <= 86)) { icon = W.snow;  desc = acPick(['Snow today! Time to build a snowboy, yes yes!', "It's snowing, hm hm! Bundle up tight!"]); }
-  else if (code >= 95)                               { icon = W.storm; desc = acPick(['Thunderstorm! Even Tom Nook stays inside, hm!', 'Lightning today - stay cozy, yes yes!']); }
+  else if (code >= 95)                               { icon = W.storm; desc = acPick(['Thunderstorm! Even the shopkeeper stays inside, hm!', 'Lightning today - stay cozy, yes yes!']); }
   else {
     icon = pct > 50 ? W.rain1 : W.part2;
     desc = pct > 50 ? `${pct}% chance of rain, hm! Umbrella time~` : 'Decent weather today, yes yes!';
@@ -1243,9 +1243,9 @@ async function initWeather() {
   if (!el) return;
 
   const FALLBACKS = [
-    '\u{1F343} Check outside - Isabelle has no signal today, hm~',
-    '\u{1F33F} Weather unknown! Tom Nook says venture out, yes yes!',
-    '\u{1F989} Blathers suggests: observe nature directly, hm~',
+    '\u{1F343} Check outside - the secretary has no signal today, hm~',
+    '\u{1F33F} Weather unknown! The shopkeeper says venture out, yes yes!',
+    '\u{1F989} The curator suggests: observe nature directly, hm~',
   ];
 
   // Show AC-style striped Loading button while fetching
@@ -1477,6 +1477,7 @@ const ICONS = {
 
 const TAB_REASSIGN_KEY = 'tabReassignments';
 const GROUP_MERGE_KEY  = 'groupMerges';
+const GROUP_ORDER_KEY  = 'groupOrder';
 
 async function loadTabReassignments() {
   return (await storageGet(TAB_REASSIGN_KEY)) || {};
@@ -1489,6 +1490,26 @@ async function loadGroupMerges() {
 }
 async function saveGroupMerges(data) {
   await storageSet(GROUP_MERGE_KEY, data);
+}
+async function loadGroupOrder() {
+  return (await storageGet(GROUP_ORDER_KEY)) || [];
+}
+async function saveGroupOrder(data) {
+  await storageSet(GROUP_ORDER_KEY, data);
+}
+
+/**
+ * reorderGroup(draggedDomain, targetDomain)
+ * Moves the dragged group card to the position of the target card.
+ */
+async function reorderGroup(draggedDomain, targetDomain) {
+  const order = domainGroups.map(g => g.domain);
+  const fi = order.indexOf(draggedDomain);
+  const ti = order.indexOf(targetDomain);
+  if (fi === -1 || ti === -1 || fi === ti) return;
+  order.splice(fi, 1);
+  order.splice(ti, 0, draggedDomain);
+  await saveGroupOrder(order);
 }
 
 async function reassignTab(url, targetDomain) {
@@ -1579,6 +1600,21 @@ async function applyDragCustomizations(groups) {
 
   // --- Tab reassignments: move individual tabs to different cards ---
   for (const [url, targetDomain] of Object.entries(reassign)) {
+    // Solo group: tab was dragged to empty space ¡X give it its own card
+    if (targetDomain.startsWith('__solo_')) {
+      const src = groups.find(g => g.tabs.some(t => t.url === url) && g.domain !== targetDomain);
+      if (!src) continue;
+      const tab = src.tabs.find(t => t.url === url);
+      if (!tab) continue;
+      src.tabs = src.tabs.filter(t => t.url !== url);
+      let soloGroup = groups.find(g => g.domain === targetDomain);
+      if (!soloGroup) {
+        soloGroup = { domain: targetDomain, label: tab.title || friendlyDomain(url), tabs: [], isSolo: true };
+        groups.push(soloGroup);
+      }
+      soloGroup.tabs.push(tab);
+      continue;
+    }
     const src = groups.find(g => g.tabs.some(t => t.url === url));
     const tgt = groups.find(g => g.domain === targetDomain);
     if (!src || !tgt || src === tgt) continue;
@@ -1607,10 +1643,45 @@ async function applyDragCustomizations(groups) {
   }
 }
 
+/**
+ * _updateCardTabCount(card)
+ *
+ * After a chip is removed from DOM, re-count live chips and patch
+ * the badge ("X tabs open") and the "Close all" button in-place.
+ * Avoids a full re-render so animations aren't interrupted.
+ */
+function _updateCardTabCount(card) {
+  if (!card) return;
+  const chips = card.querySelectorAll('.page-chip[data-action="focus-tab"]');
+  const n = chips.length;
+
+  // Update badge text
+  const badge = card.querySelector('.open-tabs-badge');
+  if (badge) {
+    // Preserve the icon SVG (first child), update only the trailing text node
+    const icon = badge.querySelector('svg');
+    badge.textContent = `${n} tab${n !== 1 ? 's' : ''} open`;
+    if (icon) badge.prepend(icon);
+  }
+
+  // Update "Close all X tabs" button
+  const closeAllBtn = card.querySelector('[data-action="close-domain-tabs"]');
+  if (closeAllBtn) {
+    if (n <= 1) {
+      closeAllBtn.closest('.actions')?.remove(); // single-tab cards don't show close-all
+    } else {
+      const icon = closeAllBtn.querySelector('svg');
+      closeAllBtn.textContent = `Close all ${n} tabs`;
+      if (icon) closeAllBtn.prepend(icon);
+    }
+  }
+}
+
 // --- Drag state ---
-let currentDrag   = null; // { type:'tab'|'group', url?, fromDomain?, domain? }
-let dragOverCard  = null; // current hovered .mission-card
-let mergeTimer    = null; // setTimeout handle for shake trigger
+let currentDrag      = null;  // { type:'tab'|'group', url?, fromDomain?, domain? }
+let dragOverCard     = null;  // current hovered .mission-card
+let mergeTimer       = null;  // setTimeout handle for shake trigger
+let mergeShakeActive = false; // true once the 500ms hold fires ¡X drop = merge, else = reorder
 
 function _showDragHint(text) {
   const el = document.getElementById('dragHint');
@@ -1620,18 +1691,32 @@ function _hideDragHint() {
   const el = document.getElementById('dragHint');
   if (el) el.classList.remove('visible');
 }
+function _addNewGroupDropZone() {
+  const grid = document.getElementById('openTabsMissions');
+  if (!grid || document.getElementById('newGroupDropZone')) return;
+  const zone = document.createElement('div');
+  zone.className = 'mission-card new-group-drop-zone';
+  zone.id = 'newGroupDropZone';
+  zone.innerHTML = '<div class="new-group-drop-label">\u271A new group</div>';
+  grid.appendChild(zone);
+}
+function _removeNewGroupDropZone() {
+  document.getElementById('newGroupDropZone')?.remove();
+}
 function _clearDragOverCard() {
   if (dragOverCard) {
-    dragOverCard.classList.remove('drop-target', 'merge-target', 'merge-shake');
+    dragOverCard.classList.remove('drop-target', 'merge-target', 'merge-shake', 'drop-active');
     dragOverCard = null;
   }
   clearTimeout(mergeTimer);
   mergeTimer = null;
+  mergeShakeActive = false;
 }
 function _clearDragState() {
   document.querySelectorAll('.drag-source').forEach(el => el.classList.remove('drag-source'));
   _clearDragOverCard();
   _hideDragHint();
+  _removeNewGroupDropZone();
   currentDrag = null;
 }
 
@@ -1818,29 +1903,41 @@ function renderDomainCard(group) {
       </button>`;
   }
 
-  // Category color coding
-  const cat = getDomainCategory(group.domain);
-  const borderColor = cat ? cat.color : (hasDupes ? '#f7cd67' : '#c4b89e');
+  // Category color coding (solo groups have a neutral dashed accent)
+  const cat = group.isSolo ? null : getDomainCategory(group.domain);
+  const borderColor = group.isSolo ? '#c4b89e' : (cat ? cat.color : (hasDupes ? '#f7cd67' : '#c4b89e'));
   const catLabel = cat ? `<span class="category-pill" style="background:${cat.color};color:${cat.textColor}">${cat.label}</span>` : '';
 
   const unmergeBtn = group.mergeId
     ? `<button class="unmerge-btn" data-action="unmerge-group" data-merge-id="${group.mergeId}" title="Split this merged group">split</button>`
     : '';
 
+  // Solo group: show a "release" button to restore to original domain
+  const soloBtn = group.isSolo
+    ? `<button class="unmerge-btn solo-release-btn" data-action="release-solo-tab" data-solo-domain="${esc(group.domain)}" title="Release back to its original group">\u21A9 release</button>`
+    : '';
+
+  const dragTitle = group.isSolo
+    ? 'Drag to reorder or drop onto a group to merge'
+    : 'Drag to reorder \u2014 hold 0.5s on another group to merge';
+
+  const displayName = isLanding ? 'Homepages' : (group.label || friendlyDomain(group.domain));
+
   return `
-    <div class="mission-card domain-card" data-domain-id="${stableId}"
+    <div class="mission-card domain-card${group.isSolo ? ' solo-group' : ''}" data-domain-id="${stableId}"
          data-drag-domain="${esc(group.domain)}"
          style="border-top-color:${borderColor}">
       <div class="mission-content">
         <div class="mission-top">
           <span class="drag-handle" draggable="true"
                 data-drag-type="group" data-drag-domain="${esc(group.domain)}"
-                title="Drag onto another group to merge">${ICONS.grip}</span>
-          <span class="mission-name">${isLanding ? 'Homepages' : (group.label || friendlyDomain(group.domain))}</span>
+                title="${dragTitle}">${ICONS.grip}</span>
+          <span class="mission-name">${displayName}</span>
           ${tabBadge}
           ${catLabel}
           ${dupeBadge}
           ${unmergeBtn}
+          ${soloBtn}
         </div>
         <div class="mission-pages">
           ${pageChips}
@@ -2104,6 +2201,19 @@ async function renderStaticDashboard() {
   // --- Apply drag-drop customizations (tab reassignments + group merges) ---
   await applyDragCustomizations(domainGroups);
 
+  // --- Apply saved group order ---
+  const savedGroupOrder = await loadGroupOrder();
+  if (savedGroupOrder.length) {
+    domainGroups.sort((a, b) => {
+      const ai = savedGroupOrder.indexOf(a.domain);
+      const bi = savedGroupOrder.indexOf(b.domain);
+      if (ai < 0 && bi < 0) return 0;
+      if (ai < 0) return 1;
+      if (bi < 0) return -1;
+      return ai - bi;
+    });
+  }
+
   // --- Render domain cards ---
   const openTabsSection      = document.getElementById('openTabsSection');
   const openTabsMissionsEl   = document.getElementById('openTabsMissions');
@@ -2194,6 +2304,20 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  // ---- Release a solo tab back to its original domain ----
+  if (action === 'release-solo-tab') {
+    e.stopPropagation();
+    const soloDomain = actionEl.dataset.soloDomain;
+    const data = await loadTabReassignments();
+    // Remove all reassignments that pointed to this solo domain
+    for (const url of Object.keys(data)) {
+      if (data[url] === soloDomain) delete data[url];
+    }
+    await saveTabReassignments(data);
+    await renderDashboard();
+    return;
+  }
+
   // ---- Close duplicate Tab Out tabs ----
   if (action === 'close-tabout-dupes') {
     await closeTabOutDupes();
@@ -2250,15 +2374,14 @@ document.addEventListener('click', async (e) => {
       chip.style.opacity    = '0';
       chip.style.transform  = 'scale(0.8)';
       setTimeout(() => {
+        const parentCard = chip.closest('.mission-card');
         chip.remove();
-        // If the card now has no tabs, remove it too
-        const parentCard = document.querySelector('.mission-card:has(.mission-pages:empty)');
-        if (parentCard) animateCardOut(parentCard);
-        document.querySelectorAll('.mission-card').forEach(c => {
-          if (c.querySelectorAll('.page-chip[data-action="focus-tab"]').length === 0) {
-            animateCardOut(c);
-          }
-        });
+        // Update badge and close-all button on the card
+        _updateCardTabCount(parentCard);
+        // If the card now has no chips left, animate it out
+        if (parentCard && parentCard.querySelectorAll('.page-chip[data-action="focus-tab"]').length === 0) {
+          animateCardOut(parentCard);
+        }
       }, 200);
     }
 
@@ -2495,20 +2618,21 @@ document.addEventListener('dragstart', e => {
   const grip = e.target.closest('[data-drag-type="group"]');
 
   if (chip && !grip) {
-    // Dragging an individual tab chip
     currentDrag = { type: 'tab', url: chip.dataset.dragUrl, fromDomain: chip.dataset.dragFrom };
     e.dataTransfer.setData('text/plain', JSON.stringify(currentDrag));
     e.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => chip.classList.add('drag-source'), 0);
-    _showDragHint('Drop onto a group to move this tab, hm~');
+    setTimeout(() => {
+      chip.classList.add('drag-source');
+      _addNewGroupDropZone();
+    }, 0);
+    _showDragHint('Drop on a group to move \u2014 or on the \u271A zone to create a new group, hm~');
   } else if (grip) {
-    // Dragging a group card via its grip handle
     currentDrag = { type: 'group', domain: grip.dataset.dragDomain };
     e.dataTransfer.setData('text/plain', JSON.stringify(currentDrag));
     e.dataTransfer.effectAllowed = 'move';
     const card = grip.closest('.mission-card');
     setTimeout(() => card?.classList.add('drag-source'), 0);
-    _showDragHint('Drop onto another group to merge them, yes yes!');
+    _showDragHint('Drop to \u2195 reorder \u2014 hold 0.5s on another group to \u2728 merge, yes yes!');
   }
 });
 
@@ -2519,21 +2643,26 @@ document.addEventListener('dragover', e => {
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
 
-  // New target card entered
   if (card !== dragOverCard) {
     _clearDragOverCard();
     dragOverCard = card;
     const targetDomain = card.dataset.dragDomain;
 
-    if (currentDrag.type === 'tab' && targetDomain !== currentDrag.fromDomain) {
+    if (card.id === 'newGroupDropZone') {
+      // Drop zone for creating a solo group
+      card.classList.add('drop-active');
+    } else if (currentDrag.type === 'tab' && targetDomain !== currentDrag.fromDomain) {
       card.classList.add('drop-target');
     } else if (currentDrag.type === 'group' && targetDomain && targetDomain !== currentDrag.domain) {
-      card.classList.add('merge-target');
-      // After 500ms shake the target to signal "release to merge"
+      // Start as a reorder hint; after 500ms upgrade to merge hint
+      card.classList.add('drop-target');
       mergeTimer = setTimeout(() => {
         if (dragOverCard === card) {
-          card.classList.add('merge-shake');
+          mergeShakeActive = true;
+          card.classList.remove('drop-target');
+          card.classList.add('merge-target', 'merge-shake');
           card.addEventListener('animationend', () => card.classList.remove('merge-shake'), { once: true });
+          _showDragHint('Release to \u2728 merge groups, yes yes!');
         }
       }, 500);
     }
@@ -2542,15 +2671,30 @@ document.addEventListener('dragover', e => {
 
 document.addEventListener('dragleave', e => {
   if (!dragOverCard) return;
-  // Only clear when leaving the card entirely, not just entering a child
   const related = e.relatedTarget;
   if (related && dragOverCard.contains(related)) return;
   _clearDragOverCard();
+  // Restore base hint if group drag
+  if (currentDrag?.type === 'group') {
+    _showDragHint('Drop to \u2195 reorder \u2014 hold 0.5s on another group to \u2728 merge, yes yes!');
+  }
 });
 
 document.addEventListener('drop', async e => {
   e.preventDefault();
-  if (!currentDrag || !dragOverCard) { _clearDragState(); return; }
+  if (!currentDrag) { _clearDragState(); return; }
+
+  // ---- New solo group: tab dropped on the + zone ----
+  if (currentDrag.type === 'tab' && dragOverCard?.id === 'newGroupDropZone' && currentDrag.url) {
+    const soloKey = `__solo_${Date.now().toString(36)}`;
+    await reassignTab(currentDrag.url, soloKey);
+    showToast('New group created!');
+    _clearDragState();
+    await renderDashboard();
+    return;
+  }
+
+  if (!dragOverCard) { _clearDragState(); return; }
   const targetDomain = dragOverCard.dataset.dragDomain;
 
   if (currentDrag.type === 'tab') {
@@ -2560,8 +2704,15 @@ document.addEventListener('drop', async e => {
     }
   } else if (currentDrag.type === 'group') {
     if (targetDomain && targetDomain !== currentDrag.domain) {
-      await mergeGroupDomains(currentDrag.domain, targetDomain);
-      showToast('Groups merged!');
+      if (mergeShakeActive) {
+        // Long hold: merge
+        await mergeGroupDomains(currentDrag.domain, targetDomain);
+        showToast('Groups merged!');
+      } else {
+        // Quick drop: reorder
+        await reorderGroup(currentDrag.domain, targetDomain);
+        showToast('Groups reordered!');
+      }
     }
   }
 

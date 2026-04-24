@@ -1,7 +1,7 @@
 /* ============================================================
    Tab Out  -X Animal Island theme
-   Inspired by animal-island-ui (Animal Crossing: New Horizons vibes).
-   Warm parchment, pill buttons with 3D Nintendo-press shadows,
+   Inspired by animal-island-ui (cozy island life vibes).
+   Warm parchment, pill buttons with 3D island button-press shadows,
    rounded Nunito typography, and friendly NookPhone colors.
 
    Original selectors are preserved so app.js keeps working.
@@ -40,7 +40,7 @@
   --status-cooling: #f5c31c;         /* warning yellow */
   --status-abandoned: #e05a5a;       /* soft game-red */
 
-  /* ---- 3D shadow colors (Nintendo button-press) ---- */
+  /* ---- 3D shadow colors (island button-press) ---- */
   --press-shadow: #bdaea0;           /* button bottom shadow */
   --press-shadow-soft: #d4c9b4;      /* input bottom shadow */
   --card-shadow: 0 4px 10px rgba(107, 92, 67, 0.22);
@@ -217,7 +217,7 @@ header {
   position: relative;
 }
 
-/* Tom Nook head gif - right side of header, vertically centered */
+/* shopkeeper head gif - right side of header, vertically centered */
 .header-right {
   display: flex;
   align-items: center;
@@ -1256,6 +1256,48 @@ footer                                                   { animation: fadeUp 0.5
   outline: 2.5px dashed var(--accent-rose) !important;
   outline-offset: 3px;
   background: color-mix(in srgb, var(--accent-rose) 7%, var(--card-bg-soft)) !important;
+}
+
+/* ---- New-group drop zone (appears at end of grid while dragging a tab chip) ---- */
+.new-group-drop-zone {
+  border: 2.5px dashed var(--warm-gray) !important;
+  border-top: 2.5px dashed var(--warm-gray) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  opacity: 0.6;
+  transition: opacity 0.2s, border-color 0.2s, background 0.2s;
+  cursor: copy;
+}
+.new-group-drop-zone.drop-active,
+.new-group-drop-zone:hover {
+  border-color: var(--accent-teal) !important;
+  background: color-mix(in srgb, var(--accent-teal) 8%, var(--card-bg-soft)) !important;
+  opacity: 1;
+}
+.new-group-drop-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+.new-group-drop-zone.drop-active .new-group-drop-label {
+  color: var(--accent-teal);
+}
+
+/* ---- Solo group card (tab dragged to its own group) ---- */
+.solo-group {
+  border-top-style: dashed !important;
+  opacity: 0.92;
+}
+.solo-release-btn {
+  font-size: 9px;
+  margin-left: 2px;
 }
 
 /* Floating drag hint banner */
