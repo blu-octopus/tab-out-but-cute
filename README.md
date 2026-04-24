@@ -9,6 +9,8 @@ Manage your tabs better while you're at it, yes yes ?
 
 > **Chrome / Edge only.** This extension uses Chrome Manifest V3 APIs (`chrome.tabs`, `chrome.storage.sync`, `chrome.tabGroups`). Firefox is not supported.
 
+![Preview Image of the extension](extension/assets/extension-preview.png)
+
 
 ## How to Add this Extension
 
