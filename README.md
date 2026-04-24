@@ -136,14 +136,36 @@ Island Tab Manager uses **`chrome.storage.sync`**:
 
 ---
 
-## ? Publishing to the Chrome Web Store
+## Publishing to the Chrome Web Store
 
-To distribute officially you would need to:
+Once you are happy with the beta, follow these steps to make it official.
 
-1. **Replace the villager GIF assets** with original artwork or properly licensed assets (required for store approval)
-2. Create a developer account ¡X one-time $5 fee at [chrome.google.com/webstore/devconsole](https://chrome.google.com/webstore/devconsole)
-3. ZIP the `extension/` folder contents (same as above)
-4. Submit for review ¡X Google reviews typically take 1¡V3 business days
+> **Before you publish:** Replace all fan-captured GIF assets with original artwork or properly licensed alternatives. Google will reject submissions containing third-party copyrighted media.
+
+### Step A ¡X The Developer Account
+
+1. Go to the [Chrome Web Store Developer Console](https://chrome.google.com/webstore/devconsole)
+2. Sign in with your Google Account
+3. Pay the **one-time $5 USD fee** ¡X this lets you publish up to 20 extensions
+
+### Step B ¡X The Upload
+
+1. Click **+ New Item**
+2. Upload your `IslandTabManager.zip` (run `bash pack.sh` to generate a fresh one)
+3. Fill out the listing:
+   - **Description:** Use the "shopkeeper" intro from this README ¡X it's punchy and explains the value immediately
+   - **Screenshots:** Take high-quality screenshots at **1280x800 or 640x400** of your dashboard (the tab grid, the to-do panel, the weather bar)
+   - **Privacy tab:** Because you use the `tabs` permission, Google requires an explanation ¡X paste this:
+     > *"Island Tab Manager reads open tab URLs and titles solely to display them on your new-tab dashboard. No data is ever sent to external servers. The only external network request is to Open-Meteo (open-meteo.com) for local weather, using your device's geolocation. Nothing is stored remotely."*
+
+### Step C ¡X Review and Updates
+
+- **Submit for review.** Google typically takes 1¡V3 business days to approve a new extension.
+- **To ship a bug fix or new feature later:**
+  1. Bump the version in `extension/manifest.json` (e.g. `"1.0.0"` ¡÷ `"1.1.0"`)
+  2. Run `bash pack.sh` to re-zip
+  3. Upload the new ZIP in the Developer Console
+  4. Existing users get the update automatically
 
 ---
 
