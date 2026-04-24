@@ -25,10 +25,14 @@ Manage your tabs better while you're at it, yes yes ?
 1. **Unzip** the ZIP into a permanent folder (e.g. `~/Desktop/IslandTabManager/`). Don't delete this folder ¡X Chrome loads the extension live from it.
 2. Open **`chrome://extensions`** (or `edge://extensions`)
 3. Toggle **Developer mode** on (top-right corner)
-4. Click **Load unpacked** and select the **unzipped folder** (the one that contains `manifest.json`) ¡÷ **Open**
-5. Open a new tab ¡X done!
 
 ![chrome://extensions ¡X Load unpacked](extension/assets/instruction-image-2.png)
+
+4. Click **Load unpacked** and select the **unzipped folder** (the one that contains `manifest.json`) ¡÷ select "extension" folder ¡÷ **Open**
+
+![chrome://extensions ¡X Load unpacked](extension/assets/instruction-image-3.png)
+
+5. Open a new tab ¡X done!
 
 > **Tip:** Pin the extension icon from the puzzle-piece menu so it's always one click away.
 
