@@ -11,13 +11,16 @@ echo "? Packing Island Tab Manager..."
 # Remove old zip if it exists
 rm -f "$OUT"
 
-# Zip extension folder contents (not the folder itself)
-# Excludes macOS junk, git files, and editor artifacts
-zip -r "$OUT" extension/ \
+# Zip the CONTENTS of extension/ so manifest.json is at the root of the ZIP.
+# This means friends can unzip and point Chrome at the resulting folder directly
+# (no need to navigate into a subfolder).
+cd extension
+zip -r "../$OUT" . \
   --exclude "*.DS_Store" \
   --exclude "__MACOSX/*" \
   --exclude "*.map" \
-  --exclude "extension/*.log"
+  --exclude "*.log"
+cd ..
 
 SIZE=$(du -sh "$OUT" | cut -f1)
 echo ""

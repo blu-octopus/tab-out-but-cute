@@ -20,17 +20,19 @@ Manage your tabs better while you're at it, yes yes ?
 
 ![GitHub Code > Download ZIP](extension/assets/instruction-image-1.png)
 
-### Step 2 Unzip
+### Step 2 Unzip and Load
 
-1. **Unzip** into a permanent folder (e.g. `~/Desktop/IslandTabManager/`). Don't delete this folder. Chrome needs it loaded.
+1. **Unzip** the ZIP into a permanent folder (e.g. `~/Desktop/IslandTabManager/`). Don't delete this folder ¡X Chrome loads the extension live from it.
 2. Open **`chrome://extensions`** (or `edge://extensions`)
 3. Toggle **Developer mode** on (top-right corner)
-4. Click **Load unpacked** and select the unzipped folder -> **Open**
-5. Open a new tab, and it's there! Bam! 
+4. Click **Load unpacked** and select the **unzipped folder** (the one that contains `manifest.json`) ¡÷ **Open**
+5. Open a new tab ¡X done!
 
-![chrome://extensions ?X Load unpacked](extension/assets/instruction-image-2.png)
+![chrome://extensions ¡X Load unpacked](extension/assets/instruction-image-2.png)
 
-> **Tip:** Pin the extension icon from the menu so it's always one click away.
+> **Tip:** Pin the extension icon from the puzzle-piece menu so it's always one click away.
+
+> **Seeing "Could not load manifest"?** You're pointing at the wrong folder. Make sure you select the folder that contains `manifest.json` directly ¡X not a parent folder above it.
 
 [Submit your feedback here](https://forms.gle/RRjReF9jY4wkJAKaA)
 
