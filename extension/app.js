@@ -2883,6 +2883,47 @@ document.addEventListener('error', e => {
 
 
 /* ----------------------------------------------------------------
+   GOOGLE APPS LAUNCHER (header 9-dot button)
+   ---------------------------------------------------------------- */
+function initGoogleAppsLauncher() {
+  const wrap = document.getElementById('googleAppsWrap');
+  const btn = document.getElementById('googleAppsBtn');
+  const panel = document.getElementById('googleAppsPanel');
+  if (!wrap || !btn || !panel) return;
+
+  function open() {
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function close() {
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function toggle() {
+    if (panel.hidden) open(); else close();
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    toggle();
+  });
+
+  document.addEventListener('click', () => {
+    if (!panel.hidden) close();
+  });
+  wrap.addEventListener('click', e => e.stopPropagation());
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) close();
+  });
+
+  panel.addEventListener('click', e => {
+    if (e.target.closest('a')) close();
+  });
+}
+
+/* ----------------------------------------------------------------
    INITIALIZE
    ---------------------------------------------------------------- */
+initGoogleAppsLauncher();
 renderDashboard();

@@ -215,6 +215,8 @@ header {
   border-radius: var(--r-card-title);
   box-shadow: var(--card-shadow);
   position: relative;
+  /* Sit above .right-rail / matrix (later siblings paint on top by default) so the apps dropdown is not covered */
+  z-index: 80;
 }
 
 /* shopkeeper head gif - right side of header, vertically centered */
@@ -224,6 +226,126 @@ header {
   align-self: center;
   padding-right: 52px;   /* clear the absolute-positioned leaf */
   flex-shrink: 0;
+  gap: 14px;
+}
+
+/* Google Workspace-style app launcher (9-dot waffle) ??? opens link grid in-page */
+.google-apps-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 1; /* panel stacks above Tom Nook / leaf decorations inside header */
+}
+
+.google-apps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border: 2px solid var(--warm-gray);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--ink-strong);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(80, 60, 40, 0.08);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+}
+
+.google-apps-btn:hover {
+  background: #fffef8;
+  border-color: #c9c4b8;
+}
+
+.google-apps-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(111, 186, 44, 0.45);
+}
+
+.google-apps-btn:active {
+  transform: scale(0.96);
+}
+
+.google-apps-icon {
+  display: block;
+  opacity: 0.76;
+}
+
+.google-apps-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 260px;
+  max-width: min(92vw, 320px);
+  padding: 6px;
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-card);
+  box-shadow: var(--card-shadow);
+  z-index: 2;
+}
+
+.google-apps-panel[hidden] {
+  display: none !important;
+}
+
+.google-apps-panel-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.google-apps-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--ink-strong);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: var(--r-pill);
+  border: 2px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* Rounded stroke icons  -X same cozy weight as matrix / heroicons-style UI */
+.google-apps-item-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--ink-strong);
+  opacity: 0.82;
+}
+
+.google-apps-item-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.google-apps-item:hover,
+.google-apps-item:focus-visible {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--warm-gray);
+  outline: none;
+}
+
+.google-apps-item.google-apps-more {
+  grid-column: 1 / -1;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 8px 10px;
+}
+
+.google-apps-item.google-apps-more .google-apps-item-icon {
+  opacity: 0.65;
 }
 
 .tom-nook-header {
