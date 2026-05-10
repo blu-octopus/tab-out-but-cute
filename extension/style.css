@@ -110,8 +110,7 @@ body::after {
   padding: 48px 32px 220px; /* extra bottom room for taller SVG ocean */
 }
 
-/* Villager dancer - cycles through GIFs from assets/villager dancing/
-   Anchored to the left side of the ocean scene. */
+/* Footer capy SVG ¡X anchored to the left side of the ocean scene */
 .villager-footer {
   position: absolute;
   bottom: 96px;
@@ -124,12 +123,64 @@ body::after {
   cursor: url('icons/cursor-finger.png') 0 0, pointer;
 }
 
-.villager-dancer {
-  height: 160px;
-  width: auto;
-  image-rendering: auto;
+.footer-mascot-host {
   display: block;
   transition: opacity 0.35s ease;
+  cursor: inherit;
+}
+
+.capy-mascot-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Light motion on bundled SVG mascots */
+.mascot-anim-bob .capy-mascot-img {
+  animation: mascot-bob 2.35s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+.mascot-anim-sway .capy-mascot-img {
+  animation: mascot-sway 2.75s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+.mascot-anim-float .capy-mascot-img {
+  animation: mascot-float 3.1s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+.mascot-anim-bounce .capy-mascot-img {
+  animation: mascot-bounce 2.05s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+.mascot-anim-wiggle .capy-mascot-img {
+  animation: mascot-wiggle 2.45s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0) rotate(-2.5deg); }
+  50%      { transform: translateY(-10px) rotate(2.5deg); }
+}
+@keyframes mascot-sway {
+  0%, 100% { transform: rotate(-7deg); }
+  50%      { transform: rotate(7deg); }
+}
+@keyframes mascot-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35%      { transform: translateY(-14px) scale(1.04); }
+  55%      { transform: translateY(0) scale(1); }
+}
+@keyframes mascot-wiggle {
+  0%, 100% { transform: rotate(-4deg); }
+  33%      { transform: rotate(5deg); }
+  66%      { transform: rotate(-5deg); }
 }
 
 /* Speech bubble that appears on hover */
@@ -219,7 +270,7 @@ header {
   z-index: 80;
 }
 
-/* shopkeeper head gif - right side of header, vertically centered */
+/* Header mascot SVG - right side of header, vertically centered */
 .header-right {
   display: flex;
   align-items: center;
@@ -348,11 +399,25 @@ header {
   opacity: 0.65;
 }
 
-.tom-nook-header {
+.google-apps-more-arrow {
+  margin-left: 0.15em;
+  opacity: 0.9;
+  letter-spacing: 0;
+}
+
+.header-mascot-host {
   height: 72px;
-  width: auto;
-  image-rendering: auto;
-  display: block;
+  width: 70px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-mascot-host .capy-mascot-img {
+  width: 70px;
+  height: auto;
+  max-height: 72px;
 }
 
 /* Balanced leaf  -X sits centered on the top-right curve of the organic header */
@@ -2044,7 +2109,7 @@ footer                                                   { animation: fadeUp 0.5
 }
 
 /* ============================================================
-   MATRIX FOOTER VILLAGER  -  mini villager at bottom of To-Do
+   MATRIX FOOTER MASCOT  -  mini SVG buddy at bottom of To-Do
    ============================================================ */
 .matrix-villager-wrap {
   display: flex;
@@ -2058,12 +2123,17 @@ footer                                                   { animation: fadeUp 0.5
   user-select: none;
 }
 
-.matrix-villager-img {
-  height: 120px;
-  width: auto;
-  image-rendering: auto;
+.matrix-mascot-host {
   display: block;
   transition: opacity 0.3s ease;
+}
+
+.matrix-mascot-host .capy-mascot-img {
+  display: block;
+  margin: 0 auto;
+  width: 64px;
+  height: auto;
+  max-height: 124px;
 }
 
 .matrix-villager-bubble {
@@ -2168,6 +2238,22 @@ footer                                                   { animation: fadeUp 0.5
   font-weight: 900;
   letter-spacing: 0.05em;
   line-height: 1;
+}
+
+.tab-metrics-mascot-cell {
+  justify-content: center;
+  padding: 2px 8px;
+}
+
+.tab-metrics-capy-head {
+  display: block;
+  width: 52px;
+  height: auto;
+  animation: mascot-bob 2.55s ease-in-out infinite;
+  transform-origin: 50% 90%;
+  user-select: none;
+  pointer-events: none;
+  -webkit-user-drag: none;
 }
 
 /* ============================================================

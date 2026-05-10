@@ -15,6 +15,10 @@
 
 'use strict';
 
+/** Capybara artwork (SVG) ¡X bundled in icons/ */
+const CAPY_HEAD_SRC = 'icons/head.svg';
+const CAPY_FULL_SRC = 'icons/capy.svg';
+
 
 /* ================================================================
    DOMAIN  -- CATEGORY MAPPING
@@ -215,7 +219,7 @@ async function renderMetrics(openTabCount) {
   const score  = await computeTabScore(openTabCount, windowCount);
   const rating = getScoreRating(score);
 
-  el.style.gridTemplateColumns = 'repeat(3, 1fr)';
+  el.style.gridTemplateColumns = '1fr 1fr 1.15fr minmax(68px, 0.95fr)';
   el.innerHTML = `
     <div class="tab-metrics-item">
       <div class="tab-metrics-num">${openTabCount}</div>
@@ -229,6 +233,9 @@ async function renderMetrics(openTabCount) {
       <div class="tab-metrics-num tab-metrics-score-num" style="color:${rating.color}">${score}</div>
       <div class="tab-metrics-score-grade" style="color:${rating.color}">${rating.grade}</div>
       <div class="tab-metrics-label">tab health<br>${rating.label}</div>
+    </div>
+    <div class="tab-metrics-item tab-metrics-mascot-cell" aria-hidden="true">
+      <img class="tab-metrics-capy-head" src="${CAPY_HEAD_SRC}" alt="" width="58" height="60" draggable="false">
     </div>`;
 }
 
@@ -240,158 +247,57 @@ const Q_CONFIG = {
 };
 
 /* ============================================================
-   VILLAGER DANCER - cycles through GIFs in assets/villager dancing/
+   Capy mascots ¡X header uses head SVG; footer + matrix use full-body capy SVG
    ============================================================ */
-const VILLAGER_CAST = [
-  {
-    file: 'ankha-egyptian-cat.gif', name: 'Ankha',
-    lines: [
-      'I am ancient, and I am fabulous.',
-      'The pharaohs themselves approved this choreography.',
-      'Do not stare. Well... actually, you may stare.',
-    ]
-  },
-  {
-    file: 'bill-duck.gif', name: 'Bill',
-    lines: [
-      'BAM! That\'s how you do it, broccoflower!',
-      'I\'m on FIRE today, for real for real!',
-      'Nothing beats a good groove, broccoflower!',
-    ]
-  },
-  {
-    file: 'chillaxing.gif', name: 'Villager',
-    lines: [
-      'Just vibin\'... no stress here.',
-      'Life is good when you just let it flow.',
-      'Chill mode: permanently activated.',
-    ]
-  },
-  {
-    file: 'eugene-koala.gif', name: 'Eugene',
-    lines: [
-      'Cool of you to notice, sugarplum.',
-      'I make this look completely effortless. Obviously.',
-      'Some are simply born with it, gorgeous.',
-    ]
-  },
-  {
-    file: 'fauna-deer.gif', name: 'Fauna',
-    lines: [
-      'Oh goodness! Dancing is toadally fun, dearie!',
-      'Every step is a little gift to the world!',
-      'I just love a good twirl, toadally!',
-    ]
-  },
-  {
-    file: 'isabelle.gif', name: 'The Secretary',
-    lines: [
-      'Oh! The shopkeeper said I could take a short break...',
-      'Just one more song! Then back to the reports!',
-      'Everything is just wonderful, sir/ma\'am!',
-    ]
-  },
-  {
-    file: 'katt-animal-crossing.gif', name: 'Katt',
-    lines: [
-      'What? I wasn\'t dancing. I was... exercising.',
-      'Don\'t get the wrong idea, punk.',
-      'Fine. MAYBE I\'m having fun. A little. Whatever.',
-    ]
-  },
-  {
-    file: 'mrksza.gif', name: 'Villager',
-    lines: [
-      'Best. Day. Ever!',
-      'Island points, here I come!',
-      'Living my best island life right now!',
-    ]
-  },
-  {
-    file: 'punchy-explode.gif', name: 'Punchy',
-    lines: [
-      'WOAH-- okay that was a lot, lazy boy.',
-      'Did you see that?! Even I\'m impressed, lazy boy.',
-      'I don\'t know what just happened but I\'m into it.',
-    ]
-  },
-  {
-    file: 'punchy.gif', name: 'Punchy',
-    lines: [
-      'Yo... I\'m kinda tired but this helps, lazy boy.',
-      'One more song, then I\'m napping. Promise, lazy boy.',
-      'Z z z... wait, was I dancing? Cool, lazy boy.',
-    ]
-  },
-  {
-    file: 'quinn.gif', name: 'Quinn',
-    lines: [
-      'Magnificent, isn\'t it? I\'ve been training, gorgeous.',
-      'Eagles were born to soar AND to dance, gorgeous.',
-      'Observe and learn. This is artistry, gorgeous.',
-    ]
-  },
-  {
-    file: 'rudy.gif', name: 'Rudy',
-    lines: [
-      'YEAH! Feel the BURN, ace!',
-      'Rudy NEVER stops! NEVER, ace!',
-      'THIS IS MY CARDIO, ACE! WOOOOO!',
-    ]
-  },
-  {
-    file: 'sasha.gif', name: 'Sasha',
-    lines: [
-      'I\'ll need a snack after this... cupcake?',
-      'Dancing AND cookies. That is my entire plan, cupcake.',
-      'I\'m adorable AND talented. You\'re welcome, cupcake~',
-    ]
-  },
-  {
-    file: 'villager.gif', name: 'Villager',
-    lines: [
-      'Island points... here I come!',
-      'Island life is the best life!',
-      'The shopkeeper would be so proud right now, yes yes!',
-    ]
-  },
+
+const CAPY_BUBBLE_LINES = [
+  'Chill tabs, happy capy.',
+  'Hydrate and close one tab. You deserve it.',
+  'The shoreline looks calmer already.',
+  'Small wins stack up¡Xkeep going!',
+  'Thanks for pacing yourself today.',
 ];
 
 /**
- * initVillagerDancer() - cycles through villager GIFs near the footer,
- * showing in-character dialogue on hover.
+ * Loads an SVG as <img> and applies lightweight CSS animation (see style.css mascot-anim-*).
  */
-function initVillagerDancer() {
-  const img    = document.getElementById('villagerDancer');
+function renderCapyAsset(hostEl, src, baseClass, animName, width, height) {
+  if (!hostEl) return;
+  hostEl.className = `${baseClass} mascot-anim-${animName}`;
+  hostEl.innerHTML =
+    `<img class="capy-mascot-img" src="${src}" alt="" width="${width}" height="${height}" draggable="false">`;
+}
+
+function randomCapyLine() {
+  return CAPY_BUBBLE_LINES[Math.floor(Math.random() * CAPY_BUBBLE_LINES.length)];
+}
+
+function initHeaderMascot() {
+  const host = document.getElementById('headerMascotHost');
+  if (!host || host.dataset.mascotInited === '1') return;
+  host.dataset.mascotInited = '1';
+  renderCapyAsset(host, CAPY_HEAD_SRC, 'header-mascot-host', 'bob', 70, 72);
+}
+
+/**
+ * Ocean capy ¡X hover / click bubble lines (same character).
+ */
+function initFooterMascot() {
+  const host   = document.getElementById('footerMascotHost');
   const bubble = document.getElementById('villagerBubble');
   const wrap   = document.getElementById('villagerFooter');
-  if (!img || !bubble || !wrap) return;
+  if (!host || !bubble || !wrap || wrap.dataset.mascotInited === '1') return;
+  wrap.dataset.mascotInited = '1';
 
-  let idx = Math.floor(Math.random() * VILLAGER_CAST.length);
+  renderCapyAsset(host, CAPY_FULL_SRC, 'footer-mascot-host', 'sway', 96, 180);
 
-  function setVillager(i) {
-    const v = VILLAGER_CAST[i];
-    img.src = 'assets/villager dancing/' + v.file;
-    img.alt = v.name;
-  }
-
-  setVillager(idx);
-
-  // Click: switch to next villager (same logic as matrix villager)
   wrap.addEventListener('click', () => {
-    img.style.opacity = '0';
-    bubble.classList.remove('visible');
-    setTimeout(() => {
-      idx = (idx + 1) % VILLAGER_CAST.length;
-      setVillager(idx);
-      img.style.opacity = '1';
-    }, 340);
+    bubble.textContent = randomCapyLine();
+    bubble.classList.add('visible');
   });
 
-  // Hover: show a random dialogue line for the current villager
   wrap.addEventListener('mouseenter', () => {
-    const v = VILLAGER_CAST[idx];
-    bubble.textContent = v.lines[Math.floor(Math.random() * v.lines.length)];
+    bubble.textContent = randomCapyLine();
     bubble.classList.add('visible');
   });
   wrap.addEventListener('mouseleave', () => {
@@ -399,43 +305,31 @@ function initVillagerDancer() {
   });
 }
 
-/**
- * initMatrixVillager()  -  tiny villager in To-Do panel
- * Starts on a random villager, hover shows dialogue, click switches character.
- * Called after renderMatrixColumn() re-renders the DOM.
- */
-let _matrixVillagerIdx = Math.floor(Math.random() * VILLAGER_CAST.length);
+let _matrixMascotAbort = null;
 
-function initMatrixVillager() {
+function initMatrixMascot() {
   const wrap   = document.getElementById('matrixVillagerWrap');
-  const img    = document.getElementById('matrixVillagerImg');
+  const host   = document.getElementById('matrixMascotHost');
   const bubble = document.getElementById('matrixVillagerBubble');
-  if (!wrap || !img || !bubble) return;
+  if (!wrap || !host || !bubble) return;
 
-  function setVillager(i) {
-    const v = VILLAGER_CAST[i];
-    img.src = 'assets/villager dancing/' + v.file;
-    img.alt = v.name;
-  }
-  setVillager(_matrixVillagerIdx);
+  if (_matrixMascotAbort) _matrixMascotAbort.abort();
+  _matrixMascotAbort = new AbortController();
+  const sig = _matrixMascotAbort.signal;
+
+  renderCapyAsset(host, CAPY_FULL_SRC, 'matrix-mascot-host', 'bob', 64, 120);
 
   wrap.addEventListener('mouseenter', () => {
-    const v = VILLAGER_CAST[_matrixVillagerIdx];
-    bubble.textContent = v.lines[Math.floor(Math.random() * v.lines.length)];
+    bubble.textContent = randomCapyLine();
     bubble.classList.add('visible');
-  });
+  }, { signal: sig });
   wrap.addEventListener('mouseleave', () => {
     bubble.classList.remove('visible');
-  });
+  }, { signal: sig });
   wrap.addEventListener('click', () => {
-    img.style.opacity = '0';
-    bubble.classList.remove('visible');
-    setTimeout(() => {
-      _matrixVillagerIdx = (_matrixVillagerIdx + 1) % VILLAGER_CAST.length;
-      setVillager(_matrixVillagerIdx);
-      img.style.opacity = '1';
-    }, 280);
-  });
+    bubble.textContent = randomCapyLine();
+    bubble.classList.add('visible');
+  }, { signal: sig });
 }
 
 /** Escape text for HTML content */
@@ -505,13 +399,13 @@ async function renderMatrixColumn() {
     <div class="matrix-grid">
       ${['do','schedule','delegate','cut'].map(renderQ).join('')}
     </div>
-    <div class="matrix-villager-wrap" id="matrixVillagerWrap" title="Click to meet someone new!">
+    <div class="matrix-villager-wrap" id="matrixVillagerWrap" title="Hang out with the capybara">
       <div class="matrix-villager-bubble" id="matrixVillagerBubble"></div>
-      <img class="matrix-villager-img" id="matrixVillagerImg" src="" alt="">
+      <div class="matrix-mascot-host" id="matrixMascotHost"></div>
     </div>`;
 
-  // Re-attach villager events after DOM re-render
-  initMatrixVillager();
+  // Re-attach mascot events after DOM re-render
+  initMatrixMascot();
 }
 
 async function addMatrixTask(text, quadrant) {
@@ -2080,7 +1974,8 @@ async function renderStaticDashboard() {
   if (subEl)      subEl.textContent      = getGreetingSub();
   if (dateEl)     dateEl.textContent     = getDateDisplay();
   initWeather();         // async, updates #weatherLine when ready
-  initVillagerDancer();  // footer GIF cycle + hover dialogue
+  initHeaderMascot();
+  initFooterMascot();    // footer SVG buddy + hover dialogue
 
   // --- Fetch tabs ---
   await fetchOpenTabs();

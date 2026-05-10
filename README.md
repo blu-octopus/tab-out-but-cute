@@ -79,7 +79,7 @@ For version update, repeat Step 1 for a new ZIP:
 - Score goes up when you use the matrix, merge groups, and save tabs for later
 
 ### Cozy extras
-- Dancing island villager GIFs near the footer. Click to cycle characters, hover for in-character dialogue
+- Animated SVG mascot buddies near the footer and in the To-Do panel. Click to cycle, hover for a line of dialogue
 - Click-anywhere SVG particle burst effect
 - Custom finger cursor and leaf header decoration
 - Ocean wave SVG footer
@@ -142,9 +142,6 @@ Island Tab Manager uses **`chrome.storage.sync`**:
 
 The **code** is MIT, same as the original Tab Out by Zara.
 
-The **villager GIF assets** are fan-captured clips used for personal, non-commercial purposes only.
+Mascot decorations are **original inline SVG** with CSS animation (no bundled raster character art).
 
-Please keep credits intact. 
-
-
-Hope you have a fun time! The shopkeeper believes in fair trade, hm hm!?
+Hope you have a fun time!

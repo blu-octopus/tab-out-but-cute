@@ -28,7 +28,7 @@
       <div class="weather-line" id="weatherLine" style="display:none"></div>
     </div>
     <div class="header-right">
-      <img class="tom-nook-header" src="assets/tom-nook-head-emoji.gif" alt="Shopkeeper" aria-hidden="true">
+      <div class="header-mascot-host" id="headerMascotHost" aria-hidden="true"></div>
       <!-- Google Apps launcher (same 9-dot control as Gmail / Workspace top bar opens this style of menu elsewhere) -->
       <div class="google-apps-wrap" id="googleAppsWrap">
         <button type="button" class="google-apps-btn" id="googleAppsBtn" aria-label="Google apps"
@@ -79,7 +79,7 @@
             </a>
             <a class="google-apps-item google-apps-more" role="menuitem" href="https://www.google.com/about/products/" target="_blank" rel="noopener noreferrer">
               <span class="google-apps-item-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.25"/><circle cx="12" cy="12" r="1.25"/><circle cx="18" cy="12" r="1.25"/></svg></span>
-              More from Google ¡÷
+              More from Google <span class="google-apps-more-arrow" aria-hidden="true">&rarr;</span>
             </a>
           </div>
         </div>
@@ -190,18 +190,15 @@
     <div class="last-refresh" id="lastRefresh"></div>
   </footer>
 
-  <!-- Capybaras swimming in the ocean footer -->
-  <!-- Villager dancer cycles through GIFs in assets/villager dancing/ -->
+  <!-- Animated SVG buddy in the ocean footer (click to swap) -->
   <div class="villager-footer" id="villagerFooter">
     <div class="villager-bubble" id="villagerBubble"></div>
-    <img class="villager-dancer" id="villagerDancer" src="" alt="" aria-hidden="true">
+    <div class="footer-mascot-host" id="footerMascotHost" aria-hidden="true"></div>
   </div>
 
   <!-- Credits overlaid on the ocean wave -->
   <div class="footer-credits" aria-label="Credits">
-    <span> plz star my github 
-      <a href="https://github.com/blu-octopus/tab-out-but-cute" target="_top">
-      </a>repo</a> </span>
+    <span> plz star my github <a href="https://github.com/blu-octopus/tab-out-but-cute" target="_top">repo</a></span>
     <a href="https://github.com/blu-octopus" target="_top">blu-octopus</a>
   </div>
 
