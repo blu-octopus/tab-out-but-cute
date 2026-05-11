@@ -1345,7 +1345,8 @@ async function saveTabReassignments(data) {
   await storageSet(TAB_REASSIGN_KEY, data);
 }
 async function loadGroupMerges() {
-  return (await storageGet(GROUP_MERGE_KEY)) || [];
+  const raw = (await storageGet(GROUP_MERGE_KEY)) || [];
+  return raw.map(m => ({ ...m, domains: dedupeMergeDomains(m.domains) }));
 }
 async function saveGroupMerges(data) {
   await storageSet(GROUP_MERGE_KEY, data);
@@ -1355,6 +1356,36 @@ async function loadGroupOrder() {
 }
 async function saveGroupOrder(data) {
   await storageSet(GROUP_ORDER_KEY, data);
+}
+
+/**
+ * mergeHostKey(d)
+ *
+ * Stable key for matching merge entries to live group.domain values.
+ * Fixes www vs bare host and casing (merge.domains vs groupMap keys).
+ * Leaves synthetic keys (__solo_*, __landing-pages__, custom groupKey) unchanged except lowercasing non-__ host-like strings is avoided for __ prefixed only.
+ */
+function mergeHostKey(d) {
+  if (!d) return '';
+  if (d.startsWith('__')) return d;
+  return d.replace(/^www\./i, '').toLowerCase();
+}
+
+function dedupeMergeDomains(domains) {
+  const seen = new Set();
+  const out = [];
+  for (const d of domains || []) {
+    const k = mergeHostKey(d);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(d.startsWith('__') ? d : k);
+  }
+  return out;
+}
+
+function groupBelongsToMerge(groupDomain, mergeDomains) {
+  const gk = mergeHostKey(groupDomain);
+  return (mergeDomains || []).some(md => mergeHostKey(md) === gk);
 }
 
 /**
@@ -1377,23 +1408,52 @@ async function reassignTab(url, targetDomain) {
   await saveTabReassignments(data);
 }
 
+/** Remove tab from Chrome's native tab group (strip) when reassigned on the dashboard. */
+async function ungroupChromeTab(tabId) {
+  if (tabId == null || !Number.isFinite(tabId)) return;
+  if (!chrome.tabs?.ungroup) return;
+  try {
+    await chrome.tabs.ungroup([tabId]);
+  } catch (err) {
+    console.warn('[tab-out] tabs.ungroup failed:', err);
+  }
+}
+
+function parseChipTabId(chip) {
+  const raw = chip?.dataset?.dragTabId;
+  if (raw === undefined || raw === '') return null;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
 async function mergeGroupDomains(domain1, domain2) {
   const merges = await loadGroupMerges();
-  const m1 = merges.find(m => m.domains.includes(domain1));
-  const m2 = merges.find(m => m.domains.includes(domain2));
+  const findMerge = dom =>
+    merges.find(m => m.domains.some(d => mergeHostKey(d) === mergeHostKey(dom)));
+  const addDomain = (arr, d) => {
+    if (!d) return;
+    const k = mergeHostKey(d);
+    if (arr.some(x => mergeHostKey(x) === k)) return;
+    arr.push(d.startsWith('__') ? d : k);
+  };
+  const m1 = findMerge(domain1);
+  const m2 = findMerge(domain2);
   let mergedDomains;
   if (m1 && m2 && m1 !== m2) {
-    m1.domains.push(...m2.domains.filter(d => !m1.domains.includes(d)));
+    for (const d of m2.domains) addDomain(m1.domains, d);
+    m1.domains = dedupeMergeDomains(m1.domains);
     merges.splice(merges.indexOf(m2), 1);
     mergedDomains = m1.domains;
   } else if (m1) {
-    if (!m1.domains.includes(domain2)) m1.domains.push(domain2);
+    addDomain(m1.domains, domain2);
+    m1.domains = dedupeMergeDomains(m1.domains);
     mergedDomains = m1.domains;
   } else if (m2) {
-    if (!m2.domains.includes(domain1)) m2.domains.push(domain1);
+    addDomain(m2.domains, domain1);
+    m2.domains = dedupeMergeDomains(m2.domains);
     mergedDomains = m2.domains;
   } else {
-    const entry = { id: Date.now().toString(36), domains: [domain1, domain2] };
+    const entry = { id: Date.now().toString(36), domains: dedupeMergeDomains([domain1, domain2]) };
     merges.push(entry);
     mergedDomains = entry.domains;
   }
@@ -1421,25 +1481,36 @@ async function applyChromeMergeGroup(domains) {
 
   try {
     const allTabs = await chrome.tabs.query({});
-    const tabIds = allTabs
-      .filter(t => {
-        try {
-          const host = new URL(t.url).hostname.replace(/^www\./, '');
-          return domains.some(d => host === d || host.endsWith('.' + d));
-        } catch { return false; }
-      })
-      .map(t => t.id);
+    const matchesHost = (hostNorm, d) => {
+      const dn = mergeHostKey(d);
+      return hostNorm === dn || (dn && hostNorm.endsWith('.' + dn));
+    };
+    const matched = allTabs.filter(t => {
+      try {
+        const hostNorm = mergeHostKey(new URL(t.url).hostname);
+        return domains.some(d => matchesHost(hostNorm, d));
+      } catch { return false; }
+    });
 
-    if (tabIds.length < 1) return;
+    if (matched.length < 1) return;
 
-    const groupId = await chrome.tabs.group({ tabIds });
+    // chrome.tabs.group only accepts tabs from the same window ¡X group per window.
+    const byWindow = new Map();
+    for (const t of matched) {
+      if (!byWindow.has(t.windowId)) byWindow.set(t.windowId, []);
+      byWindow.get(t.windowId).push(t.id);
+    }
 
-    // Pick a colour from the first domain's category
-    const firstCat = DOMAIN_CATEGORY_MAP[domains[0].replace(/^www\./, '')] || null;
+    const firstKey = mergeHostKey(domains[0] || '');
+    const firstCat = DOMAIN_CATEGORY_MAP[firstKey] || null;
     const color = (firstCat && CAT_TO_CHROME_COLOR[firstCat]) || 'grey';
-    const title = domains.map(d => friendlyDomain(d)).join(' + ');
+    const title = domains.map(d => friendlyDomain(mergeHostKey(d))).join(' + ');
 
-    await chrome.tabGroups.update(groupId, { title, color });
+    for (const tabIds of byWindow.values()) {
+      if (tabIds.length < 1) continue;
+      const groupId = await chrome.tabs.group({ tabIds });
+      await chrome.tabGroups.update(groupId, { title, color });
+    }
   } catch (err) {
     console.warn('[tab-out] Chrome tab group update failed:', err);
   }
@@ -1489,7 +1560,7 @@ async function applyDragCustomizations(groups) {
 
   // --- Group merges: combine multiple domain cards into one ---
   for (const merge of merges) {
-    const targets = groups.filter(g => merge.domains.includes(g.domain));
+    const targets = groups.filter(g => groupBelongsToMerge(g.domain, merge.domains));
     if (targets.length < 2) continue;
     const primary = targets[0];
     for (const g of targets.slice(1)) {
@@ -1648,7 +1719,7 @@ function buildOverflowChips(hiddenTabs, urlCounts = {}, sourceDomain = '') {
     return `<div class="page-chip clickable${chipClass}"
          draggable="true"
          data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
-         data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(sourceDomain)}">
+         data-drag-type="tab" data-drag-tab-id="${tab.id != null ? tab.id : ''}" data-drag-url="${safeUrl}" data-drag-from="${esc(sourceDomain)}">
       <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" data-img-fallback="leaf">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
@@ -1731,7 +1802,7 @@ function renderDomainCard(group) {
     return `<div class="page-chip clickable${chipClass}"
          draggable="true"
          data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
-         data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(group.domain)}">
+         data-drag-type="tab" data-drag-tab-id="${tab.id != null ? tab.id : ''}" data-drag-url="${safeUrl}" data-drag-from="${esc(group.domain)}">
       <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" data-img-fallback="leaf">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
@@ -2478,7 +2549,12 @@ document.addEventListener('dragstart', e => {
   const grip = e.target.closest('[data-drag-type="group"]');
 
   if (chip && !grip) {
-    currentDrag = { type: 'tab', url: chip.dataset.dragUrl, fromDomain: chip.dataset.dragFrom };
+    currentDrag = {
+      type: 'tab',
+      url: chip.dataset.dragUrl,
+      fromDomain: chip.dataset.dragFrom,
+      tabId: parseChipTabId(chip),
+    };
     e.dataTransfer.setData('text/plain', JSON.stringify(currentDrag));
     e.dataTransfer.effectAllowed = 'move';
     setTimeout(() => {
@@ -2548,6 +2624,7 @@ document.addEventListener('drop', async e => {
   if (currentDrag.type === 'tab' && dragOverCard?.id === 'newGroupDropZone' && currentDrag.url) {
     const soloKey = `__solo_${Date.now().toString(36)}`;
     await reassignTab(currentDrag.url, soloKey);
+    await ungroupChromeTab(currentDrag.tabId);
     showToast('New group created!');
     _clearDragState();
     await renderDashboard();
@@ -2560,6 +2637,7 @@ document.addEventListener('drop', async e => {
   if (currentDrag.type === 'tab') {
     if (targetDomain && targetDomain !== currentDrag.fromDomain && currentDrag.url) {
       await reassignTab(currentDrag.url, targetDomain);
+      await ungroupChromeTab(currentDrag.tabId);
       showToast('Tab moved!');
     }
   } else if (currentDrag.type === 'group') {
@@ -2583,6 +2661,36 @@ document.addEventListener('drop', async e => {
 document.addEventListener('dragend', () => {
   _clearDragState();
 });
+
+/* ----------------------------------------------------------------
+   Live dashboard refresh when tabs change (no manual reload)
+   ---------------------------------------------------------------- */
+let liveTabRefreshTimer = null;
+function scheduleDashboardRefresh() {
+  clearTimeout(liveTabRefreshTimer);
+  liveTabRefreshTimer = setTimeout(async () => {
+    liveTabRefreshTimer = null;
+    if (currentDrag) return;
+    try {
+      await renderDashboard();
+    } catch (e) {
+      console.warn('[tab-out] Live refresh render failed:', e);
+    }
+  }, 200);
+}
+
+function initLiveTabRefresh() {
+  if (!chrome.tabs?.onCreated || initLiveTabRefresh._init) return;
+  initLiveTabRefresh._init = true;
+  chrome.tabs.onCreated.addListener(scheduleDashboardRefresh);
+  chrome.tabs.onRemoved.addListener(scheduleDashboardRefresh);
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.discarded != null && Object.keys(changeInfo).length === 1) return;
+    scheduleDashboardRefresh();
+  });
+  if (chrome.tabs.onMoved) chrome.tabs.onMoved.addListener(scheduleDashboardRefresh);
+  if (chrome.tabGroups?.onUpdated) chrome.tabGroups.onUpdated.addListener(scheduleDashboardRefresh);
+}
 
 // ---- Matrix input: live @ mention trigger ----
 document.addEventListener('input', (e) => {
@@ -2785,5 +2893,6 @@ function initGoogleAppsLauncher() {
 /* ----------------------------------------------------------------
    INITIALIZE
    ---------------------------------------------------------------- */
+initLiveTabRefresh();
 initGoogleAppsLauncher();
 renderDashboard();
