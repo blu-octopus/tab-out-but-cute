@@ -219,7 +219,7 @@ async function renderMetrics(openTabCount) {
   const score  = await computeTabScore(openTabCount, windowCount);
   const rating = getScoreRating(score);
 
-  el.style.gridTemplateColumns = '1fr 1fr 1.15fr minmax(68px, 0.95fr)';
+  el.style.gridTemplateColumns = 'repeat(3, 1fr)';
   el.innerHTML = `
     <div class="tab-metrics-item">
       <div class="tab-metrics-num">${openTabCount}</div>
@@ -233,9 +233,6 @@ async function renderMetrics(openTabCount) {
       <div class="tab-metrics-num tab-metrics-score-num" style="color:${rating.color}">${score}</div>
       <div class="tab-metrics-score-grade" style="color:${rating.color}">${rating.grade}</div>
       <div class="tab-metrics-label">tab health<br>${rating.label}</div>
-    </div>
-    <div class="tab-metrics-item tab-metrics-mascot-cell" aria-hidden="true">
-      <img class="tab-metrics-capy-head" src="${CAPY_HEAD_SRC}" alt="" width="58" height="60" draggable="false">
     </div>`;
 }
 
@@ -263,7 +260,8 @@ const CAPY_BUBBLE_LINES = [
  */
 function renderCapyAsset(hostEl, src, baseClass, animName, width, height) {
   if (!hostEl) return;
-  hostEl.className = `${baseClass} mascot-anim-${animName}`;
+  const animClass = animName ? ` mascot-anim-${animName}` : '';
+  hostEl.className = `${baseClass}${animClass}`;
   hostEl.innerHTML =
     `<img class="capy-mascot-img" src="${src}" alt="" width="${width}" height="${height}" draggable="false">`;
 }
@@ -276,7 +274,8 @@ function initHeaderMascot() {
   const host = document.getElementById('headerMascotHost');
   if (!host || host.dataset.mascotInited === '1') return;
   host.dataset.mascotInited = '1';
-  renderCapyAsset(host, CAPY_HEAD_SRC, 'header-mascot-host', 'bob', 70, 72);
+  /* Bob runs on .header-mascot-stack in CSS; inner is static so leaf + head move together */
+  renderCapyAsset(host, CAPY_HEAD_SRC, 'header-mascot-inner', null, 70, 72);
 }
 
 /**
@@ -303,33 +302,6 @@ function initFooterMascot() {
   wrap.addEventListener('mouseleave', () => {
     bubble.classList.remove('visible');
   });
-}
-
-let _matrixMascotAbort = null;
-
-function initMatrixMascot() {
-  const wrap   = document.getElementById('matrixVillagerWrap');
-  const host   = document.getElementById('matrixMascotHost');
-  const bubble = document.getElementById('matrixVillagerBubble');
-  if (!wrap || !host || !bubble) return;
-
-  if (_matrixMascotAbort) _matrixMascotAbort.abort();
-  _matrixMascotAbort = new AbortController();
-  const sig = _matrixMascotAbort.signal;
-
-  renderCapyAsset(host, CAPY_FULL_SRC, 'matrix-mascot-host', 'bob', 64, 120);
-
-  wrap.addEventListener('mouseenter', () => {
-    bubble.textContent = randomCapyLine();
-    bubble.classList.add('visible');
-  }, { signal: sig });
-  wrap.addEventListener('mouseleave', () => {
-    bubble.classList.remove('visible');
-  }, { signal: sig });
-  wrap.addEventListener('click', () => {
-    bubble.textContent = randomCapyLine();
-    bubble.classList.add('visible');
-  }, { signal: sig });
 }
 
 /** Escape text for HTML content */
@@ -398,14 +370,7 @@ async function renderMatrixColumn() {
     </div>
     <div class="matrix-grid">
       ${['do','schedule','delegate','cut'].map(renderQ).join('')}
-    </div>
-    <div class="matrix-villager-wrap" id="matrixVillagerWrap" title="Hang out with the capybara">
-      <div class="matrix-villager-bubble" id="matrixVillagerBubble"></div>
-      <div class="matrix-mascot-host" id="matrixMascotHost"></div>
     </div>`;
-
-  // Re-attach mascot events after DOM re-render
-  initMatrixMascot();
 }
 
 async function addMatrixTask(text, quadrant) {

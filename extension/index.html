@@ -21,14 +21,27 @@
        HEADER ??? greeting on the left
        ================================================================ -->
   <header>
-    <div class="header-left">
-      <h1 id="greeting"></h1>
-      <div class="greeting-sub" id="greetingSub"></div>
-      <div class="date" id="dateDisplay"></div>
-      <div class="weather-line" id="weatherLine" style="display:none"></div>
+    <div class="header-main">
+      <div class="header-mascot-column" aria-hidden="true">
+        <div class="header-mascot-stack">
+          <span class="header-hud-leaf-outer">
+            <span class="header-hud-leaf">
+              <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+              </svg>
+            </span>
+          </span>
+          <div class="header-mascot-inner" id="headerMascotHost"></div>
+        </div>
+      </div>
+      <div class="header-left">
+        <h1 id="greeting"></h1>
+        <div class="greeting-sub" id="greetingSub"></div>
+        <div class="date" id="dateDisplay"></div>
+        <div class="weather-line" id="weatherLine" style="display:none"></div>
+      </div>
     </div>
     <div class="header-right">
-      <div class="header-mascot-host" id="headerMascotHost" aria-hidden="true"></div>
       <!-- Google Apps launcher (same 9-dot control as Gmail / Workspace top bar opens this style of menu elsewhere) -->
       <div class="google-apps-wrap" id="googleAppsWrap">
         <button type="button" class="google-apps-btn" id="googleAppsBtn" aria-label="Google apps"
@@ -85,11 +98,6 @@
         </div>
       </div>
     </div>
-    <span class="header-leaf" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
-        <path fill="currentColor" d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
-      </svg>
-    </span>
   </header>
 
   <!-- ================================================================
