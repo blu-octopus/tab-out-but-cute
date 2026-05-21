@@ -1,9 +1,9 @@
 /* ================================================================
-   Tab Out ??? Dashboard App (Pure Extension Edition)
+   Capy Tab Manager -- dashboard app (pure extension edition)
 
    This file is the brain of the dashboard. Now that the dashboard
    IS the extension page (not inside an iframe), it can call
-   chrome.tabs and chrome.storage directly ??? no postMessage bridge needed.
+   chrome.tabs and chrome.storage directly (no postMessage bridge).
 
    What this file does:
    1. Reads open browser tabs directly via chrome.tabs.query()
@@ -1346,7 +1346,10 @@ async function saveTabReassignments(data) {
 }
 async function loadGroupMerges() {
   const raw = (await storageGet(GROUP_MERGE_KEY)) || [];
-  return raw.map(m => ({ ...m, domains: dedupeMergeDomains(m.domains) }));
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(m => m && typeof m === 'object' && m.id != null)
+    .map(m => ({ ...m, domains: dedupeMergeDomains(m.domains) }));
 }
 async function saveGroupMerges(data) {
   await storageSet(GROUP_MERGE_KEY, data);
@@ -1358,15 +1361,9 @@ async function saveGroupOrder(data) {
   await storageSet(GROUP_ORDER_KEY, data);
 }
 
-/**
- * mergeHostKey(d)
- *
- * Stable key for matching merge entries to live group.domain values.
- * Fixes www vs bare host and casing (merge.domains vs groupMap keys).
- * Leaves synthetic keys (__solo_*, __landing-pages__, custom groupKey) unchanged except lowercasing non-__ host-like strings is avoided for __ prefixed only.
- */
+/** Normalized host for merge matching (lowercase, strip www.). Strings starting with `__` are left unchanged. */
 function mergeHostKey(d) {
-  if (!d) return '';
+  if (!d || typeof d !== 'string') return '';
   if (d.startsWith('__')) return d;
   return d.replace(/^www\./i, '').toLowerCase();
 }
@@ -1374,7 +1371,8 @@ function mergeHostKey(d) {
 function dedupeMergeDomains(domains) {
   const seen = new Set();
   const out = [];
-  for (const d of domains || []) {
+  for (const d of Array.isArray(domains) ? domains : []) {
+    if (typeof d !== 'string') continue;
     const k = mergeHostKey(d);
     if (!k || seen.has(k)) continue;
     seen.add(k);
@@ -1410,7 +1408,7 @@ async function reassignTab(url, targetDomain) {
 
 /** Remove tab from Chrome's native tab group (strip) when reassigned on the dashboard. */
 async function ungroupChromeTab(tabId) {
-  if (tabId == null || !Number.isFinite(tabId)) return;
+  if (tabId == null || !Number.isFinite(tabId) || tabId <= 0) return;
   if (!chrome.tabs?.ungroup) return;
   try {
     await chrome.tabs.ungroup([tabId]);
@@ -1423,7 +1421,7 @@ function parseChipTabId(chip) {
   const raw = chip?.dataset?.dragTabId;
   if (raw === undefined || raw === '') return null;
   const n = parseInt(raw, 10);
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 async function mergeGroupDomains(domain1, domain2) {
@@ -1565,7 +1563,8 @@ async function applyDragCustomizations(groups) {
     const primary = targets[0];
     for (const g of targets.slice(1)) {
       primary.tabs.push(...g.tabs);
-      groups.splice(groups.indexOf(g), 1);
+      const gi = groups.indexOf(g);
+      if (gi !== -1) groups.splice(gi, 1);
     }
     primary.label        = targets.map(g => friendlyDomain(g.domain)).join(' + ');
     primary.mergeId      = merge.id;
@@ -1608,7 +1607,7 @@ function _updateCardTabCount(card) {
 }
 
 // --- Drag state ---
-let currentDrag      = null;  // { type:'tab'|'group', url?, fromDomain?, domain? }
+let currentDrag      = null;  // { type:'tab'|'group', url?, fromDomain?, domain?, tabId? }
 let dragOverCard     = null;  // current hovered .mission-card
 let mergeTimer       = null;  // setTimeout handle for shake trigger
 let mergeShakeActive = false; // true once the 500ms hold fires ¡X drop = merge, else = reorder
@@ -1664,8 +1663,8 @@ let domainGroups = [];
 /**
  * getRealTabs()
  *
- * Returns tabs that are real web pages ??? no chrome://, extension
- * pages, about:blank, etc.
+ * Returns tabs that are real web pages (no chrome://, extension
+ * pages, about:blank, etc.).
  */
 function getRealTabs() {
   return openTabs.filter(t => {
@@ -2259,7 +2258,7 @@ document.addEventListener('click', async (e) => {
       banner.style.opacity = '0';
       setTimeout(() => { banner.style.display = 'none'; banner.style.opacity = '1'; }, 400);
     }
-    showToast('Closed extra Tab Out tabs');
+    showToast('Closed extra Capy Tab Manager tabs');
     return;
   }
 
@@ -2666,6 +2665,8 @@ document.addEventListener('dragend', () => {
    Live dashboard refresh when tabs change (no manual reload)
    ---------------------------------------------------------------- */
 let liveTabRefreshTimer = null;
+let liveTabRefreshDidInit = false;
+
 function scheduleDashboardRefresh() {
   clearTimeout(liveTabRefreshTimer);
   liveTabRefreshTimer = setTimeout(async () => {
@@ -2680,15 +2681,15 @@ function scheduleDashboardRefresh() {
 }
 
 function initLiveTabRefresh() {
-  if (!chrome.tabs?.onCreated || initLiveTabRefresh._init) return;
-  initLiveTabRefresh._init = true;
+  if (!chrome.tabs?.onCreated || liveTabRefreshDidInit) return;
+  liveTabRefreshDidInit = true;
   chrome.tabs.onCreated.addListener(scheduleDashboardRefresh);
   chrome.tabs.onRemoved.addListener(scheduleDashboardRefresh);
   chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (changeInfo.discarded != null && Object.keys(changeInfo).length === 1) return;
     scheduleDashboardRefresh();
   });
-  if (chrome.tabs.onMoved) chrome.tabs.onMoved.addListener(scheduleDashboardRefresh);
+  chrome.tabs.onMoved.addListener(scheduleDashboardRefresh);
   if (chrome.tabGroups?.onUpdated) chrome.tabGroups.onUpdated.addListener(scheduleDashboardRefresh);
 }
 

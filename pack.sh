@@ -1,36 +1,31 @@
 #!/bin/bash
-# pack.sh ¡X builds a clean, shareable ZIP of Island Tab Manager
+# pack.sh -- builds a ZIP of Capy Tab Manager (Chrome Web Store / sharing)
 # Usage: ./pack.sh
 
 set -e
 
-OUT="IslandTabManager.zip"
+OUT="CapyTabManager.zip"
 
-echo "? Packing Island Tab Manager..."
+echo "Packing Capy Tab Manager..."
 
-# Remove old zip if it exists
 rm -f "$OUT"
 
-# Zip the CONTENTS of extension/ so manifest.json is at the root of the ZIP.
-# This means friends can unzip and point Chrome at the resulting folder directly
-# (no need to navigate into a subfolder).
+# Zip the contents of extension/ so manifest.json is at the root of the ZIP
+# (required for Chrome Web Store upload and for Load unpacked).
 cd extension
 zip -r "../$OUT" . \
   --exclude "*.DS_Store" \
   --exclude "__MACOSX/*" \
   --exclude "*.map" \
-  --exclude "*.log"
-cd ..
+  --exclude "*.log" \
+  --exclude "config.local.js" \
+  --exclude "assets/*"
+cd - > /dev/null
 
 SIZE=$(du -sh "$OUT" | cut -f1)
 echo ""
-echo "? Done! ¡÷ $OUT ($SIZE)"
+echo "Done: $OUT ($SIZE)"
 echo ""
-echo "Share this ZIP with friends."
-echo "They just need to:"
-echo "  1. Unzip it into a permanent folder"
-echo "  2. Go to chrome://extensions"
-echo "  3. Enable Developer Mode"
-echo "  4. Click 'Load unpacked' ¡÷ select the unzipped folder"
+echo "Chrome Web Store: upload this ZIP as the package."
+echo "Or load unpacked: unzip to a folder, chrome://extensions, Developer mode, Load unpacked."
 echo ""
-echo "That's it ¡X the shopkeeper is now watching over their tabs, hm hm! ??"
