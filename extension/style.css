@@ -110,8 +110,7 @@ body::after {
   padding: 48px 32px 220px; /* extra bottom room for taller SVG ocean */
 }
 
-/* Villager dancer - cycles through GIFs from assets/villager dancing/
-   Anchored to the left side of the ocean scene. */
+/* Footer capy SVG ¡X anchored to the left side of the ocean scene */
 .villager-footer {
   position: absolute;
   bottom: 96px;
@@ -124,12 +123,64 @@ body::after {
   cursor: url('icons/cursor-finger.png') 0 0, pointer;
 }
 
-.villager-dancer {
-  height: 160px;
-  width: auto;
-  image-rendering: auto;
+.footer-mascot-host {
   display: block;
   transition: opacity 0.35s ease;
+  cursor: inherit;
+}
+
+.capy-mascot-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Light motion on bundled SVG mascots */
+.mascot-anim-bob .capy-mascot-img {
+  animation: mascot-bob 2.35s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+.mascot-anim-sway .capy-mascot-img {
+  animation: mascot-sway 2.75s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+.mascot-anim-float .capy-mascot-img {
+  animation: mascot-float 3.1s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+.mascot-anim-bounce .capy-mascot-img {
+  animation: mascot-bounce 2.05s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+.mascot-anim-wiggle .capy-mascot-img {
+  animation: mascot-wiggle 2.45s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0) rotate(-2.5deg); }
+  50%      { transform: translateY(-10px) rotate(2.5deg); }
+}
+@keyframes mascot-sway {
+  0%, 100% { transform: rotate(-7deg); }
+  50%      { transform: rotate(7deg); }
+}
+@keyframes mascot-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  35%      { transform: translateY(-14px) scale(1.04); }
+  55%      { transform: translateY(0) scale(1); }
+}
+@keyframes mascot-wiggle {
+  0%, 100% { transform: rotate(-4deg); }
+  33%      { transform: rotate(5deg); }
+  66%      { transform: rotate(-5deg); }
 }
 
 /* Speech bubble that appears on hover */
@@ -207,7 +258,8 @@ body::after {
 header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 36px;
   padding: 20px 28px;
   background: var(--card-bg-soft);
@@ -215,44 +267,231 @@ header {
   border-radius: var(--r-card-title);
   box-shadow: var(--card-shadow);
   position: relative;
+  /* Sit above .right-rail / matrix (later siblings paint on top by default) so the apps dropdown is not covered */
+  z-index: 80;
 }
 
-/* shopkeeper head gif - right side of header, vertically centered */
-.header-right {
+/* Mascot + greeting stay grouped on the left; waffle stays right */
+.header-main {
   display: flex;
   align-items: center;
-  align-self: center;
-  padding-right: 52px;   /* clear the absolute-positioned leaf */
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Capy head + leaf ¡X column height matches stack; row centers vs .header-left */
+.header-mascot-column {
   flex-shrink: 0;
-}
-
-.tom-nook-header {
-  height: 72px;
-  width: auto;
-  image-rendering: auto;
-  display: block;
-}
-
-/* Balanced leaf  -X sits centered on the top-right curve of the organic header */
-.header-leaf {
-  position: absolute;
-  top: -20px;
-  right: 44px;   /* offset from corner so it sits on the high arc */
-  width: 52px;
-  height: 52px;
-  color: #6fba2c;
-  filter: drop-shadow(0 4px 2px rgba(60, 120, 20, 0.22));
-  transform: rotate(-28deg);
-  animation: leafSway 5s ease-in-out infinite;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
+}
+
+.header-mascot-stack {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  animation: mascot-bob 2.55s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.header-hud-leaf-outer {
+  position: absolute;
+  /* Higher on the head (crown / between ears) ¡X ratio to bundled head.svg */
+  top: -5px;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  z-index: 2;
   pointer-events: none;
 }
 
-@keyframes leafSway {
-  0%, 100% { transform: rotate(-28deg) translateY(0px); }
-  50%      { transform: rotate(-20deg) translateY(-3px); }
+.header-hud-leaf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  animation: headerHudLeafSway 4.8s ease-in-out infinite;
+}
+
+.header-hud-leaf svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Match capy head.svg outline brown (#823D00); soft leaf fill like island greens */
+.header-hud-leaf svg path {
+  fill: #8fd066;
+  stroke: #823d00;
+  stroke-width: 2.1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  paint-order: stroke fill;
+}
+
+@keyframes headerHudLeafSway {
+  0%, 100% { transform: rotate(-20deg) translateY(0); }
+  50%      { transform: rotate(-14deg) translateY(-1px); }
+}
+
+.header-mascot-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+}
+
+.header-mascot-inner .capy-mascot-img {
+  display: block;
+  width: 70px;
+  height: auto;
+  max-height: 72px;
+}
+
+/* Google apps + controls, right side of header */
+.header-right {
+  display: flex;
+  align-items: center;
+  padding-right: 0;
+  flex-shrink: 0;
+  gap: 14px;
+}
+
+/* Google Workspace-style app launcher (9-dot waffle) ??? opens link grid in-page */
+.google-apps-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 1; /* panel stacks above mascot column */
+}
+
+.google-apps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  border: 2px solid var(--warm-gray);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--ink-strong);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(80, 60, 40, 0.08);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+}
+
+.google-apps-btn:hover {
+  background: #fffef8;
+  border-color: #c9c4b8;
+}
+
+.google-apps-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(111, 186, 44, 0.45);
+}
+
+.google-apps-btn:active {
+  transform: scale(0.96);
+}
+
+.google-apps-icon {
+  display: block;
+  opacity: 0.76;
+}
+
+.google-apps-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 260px;
+  max-width: min(92vw, 320px);
+  padding: 6px;
+  background: var(--card-bg-soft);
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-card);
+  box-shadow: var(--card-shadow);
+  z-index: 2;
+}
+
+.google-apps-panel[hidden] {
+  display: none !important;
+}
+
+.google-apps-panel-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.google-apps-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--ink-strong);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: var(--r-pill);
+  border: 2px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* Rounded stroke icons  -X same cozy weight as matrix / heroicons-style UI */
+.google-apps-item-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--ink-strong);
+  opacity: 0.82;
+}
+
+.google-apps-item-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.google-apps-item:hover,
+.google-apps-item:focus-visible {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--warm-gray);
+  outline: none;
+}
+
+.google-apps-item.google-apps-more {
+  grid-column: 1 / -1;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 8px 10px;
+}
+
+.google-apps-item.google-apps-more .google-apps-item-icon {
+  opacity: 0.65;
+}
+
+.google-apps-more-arrow {
+  margin-left: 0.15em;
+  opacity: 0.9;
+  letter-spacing: 0;
 }
 
 .header-left h1 {
@@ -1922,78 +2161,12 @@ footer                                                   { animation: fadeUp 0.5
 }
 
 /* ============================================================
-   MATRIX FOOTER VILLAGER  -  mini villager at bottom of To-Do
-   ============================================================ */
-.matrix-villager-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1.5px dashed var(--warm-gray);
-  cursor: url('icons/cursor-finger.png') 0 0, pointer;
-  user-select: none;
-}
-
-.matrix-villager-img {
-  height: 120px;
-  width: auto;
-  image-rendering: auto;
-  display: block;
-  transition: opacity 0.3s ease;
-}
-
-.matrix-villager-bubble {
-  background: #fffef8;
-  border: 2px solid var(--warm-gray);
-  border-radius: 12px;
-  padding: 5px 12px;
-  font-family: var(--font-body);
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--ink);
-  text-align: center;
-  max-width: 180px;
-  white-space: normal;
-  box-shadow: 0 2px 0 0 var(--warm-gray);
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  position: relative;
-}
-.matrix-villager-bubble.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-.matrix-villager-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -11px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: var(--warm-gray);
-}
-.matrix-villager-bubble::before {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: #fffef8;
-  z-index: 1;
-}
-
-/* ============================================================
    TAB METRICS DASHBOARD
    ============================================================ */
 /* Flat HUD ¡X one unified card, vertical dividers only (no inner boxes) */
 .tab-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0;
   margin-top: 18px;
   padding: 18px 24px;

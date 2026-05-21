@@ -1,9 +1,9 @@
 /* ================================================================
-   Tab Out ??? Dashboard App (Pure Extension Edition)
+   Capy Tab Manager -- dashboard app (pure extension edition)
 
    This file is the brain of the dashboard. Now that the dashboard
    IS the extension page (not inside an iframe), it can call
-   chrome.tabs and chrome.storage directly ??? no postMessage bridge needed.
+   chrome.tabs and chrome.storage directly (no postMessage bridge).
 
    What this file does:
    1. Reads open browser tabs directly via chrome.tabs.query()
@@ -14,6 +14,10 @@
    ================================================================ */
 
 'use strict';
+
+/** Capybara artwork (SVG) ¡X bundled in icons/ */
+const CAPY_HEAD_SRC = 'icons/head.svg';
+const CAPY_FULL_SRC = 'icons/capy.svg';
 
 
 /* ================================================================
@@ -240,201 +244,63 @@ const Q_CONFIG = {
 };
 
 /* ============================================================
-   VILLAGER DANCER - cycles through GIFs in assets/villager dancing/
+   Capy mascots ¡X header uses head SVG; footer + matrix use full-body capy SVG
    ============================================================ */
-const VILLAGER_CAST = [
-  {
-    file: 'ankha-egyptian-cat.gif', name: 'Ankha',
-    lines: [
-      'I am ancient, and I am fabulous.',
-      'The pharaohs themselves approved this choreography.',
-      'Do not stare. Well... actually, you may stare.',
-    ]
-  },
-  {
-    file: 'bill-duck.gif', name: 'Bill',
-    lines: [
-      'BAM! That\'s how you do it, broccoflower!',
-      'I\'m on FIRE today, for real for real!',
-      'Nothing beats a good groove, broccoflower!',
-    ]
-  },
-  {
-    file: 'chillaxing.gif', name: 'Villager',
-    lines: [
-      'Just vibin\'... no stress here.',
-      'Life is good when you just let it flow.',
-      'Chill mode: permanently activated.',
-    ]
-  },
-  {
-    file: 'eugene-koala.gif', name: 'Eugene',
-    lines: [
-      'Cool of you to notice, sugarplum.',
-      'I make this look completely effortless. Obviously.',
-      'Some are simply born with it, gorgeous.',
-    ]
-  },
-  {
-    file: 'fauna-deer.gif', name: 'Fauna',
-    lines: [
-      'Oh goodness! Dancing is toadally fun, dearie!',
-      'Every step is a little gift to the world!',
-      'I just love a good twirl, toadally!',
-    ]
-  },
-  {
-    file: 'isabelle.gif', name: 'The Secretary',
-    lines: [
-      'Oh! The shopkeeper said I could take a short break...',
-      'Just one more song! Then back to the reports!',
-      'Everything is just wonderful, sir/ma\'am!',
-    ]
-  },
-  {
-    file: 'katt-animal-crossing.gif', name: 'Katt',
-    lines: [
-      'What? I wasn\'t dancing. I was... exercising.',
-      'Don\'t get the wrong idea, punk.',
-      'Fine. MAYBE I\'m having fun. A little. Whatever.',
-    ]
-  },
-  {
-    file: 'mrksza.gif', name: 'Villager',
-    lines: [
-      'Best. Day. Ever!',
-      'Island points, here I come!',
-      'Living my best island life right now!',
-    ]
-  },
-  {
-    file: 'punchy-explode.gif', name: 'Punchy',
-    lines: [
-      'WOAH-- okay that was a lot, lazy boy.',
-      'Did you see that?! Even I\'m impressed, lazy boy.',
-      'I don\'t know what just happened but I\'m into it.',
-    ]
-  },
-  {
-    file: 'punchy.gif', name: 'Punchy',
-    lines: [
-      'Yo... I\'m kinda tired but this helps, lazy boy.',
-      'One more song, then I\'m napping. Promise, lazy boy.',
-      'Z z z... wait, was I dancing? Cool, lazy boy.',
-    ]
-  },
-  {
-    file: 'quinn.gif', name: 'Quinn',
-    lines: [
-      'Magnificent, isn\'t it? I\'ve been training, gorgeous.',
-      'Eagles were born to soar AND to dance, gorgeous.',
-      'Observe and learn. This is artistry, gorgeous.',
-    ]
-  },
-  {
-    file: 'rudy.gif', name: 'Rudy',
-    lines: [
-      'YEAH! Feel the BURN, ace!',
-      'Rudy NEVER stops! NEVER, ace!',
-      'THIS IS MY CARDIO, ACE! WOOOOO!',
-    ]
-  },
-  {
-    file: 'sasha.gif', name: 'Sasha',
-    lines: [
-      'I\'ll need a snack after this... cupcake?',
-      'Dancing AND cookies. That is my entire plan, cupcake.',
-      'I\'m adorable AND talented. You\'re welcome, cupcake~',
-    ]
-  },
-  {
-    file: 'villager.gif', name: 'Villager',
-    lines: [
-      'Island points... here I come!',
-      'Island life is the best life!',
-      'The shopkeeper would be so proud right now, yes yes!',
-    ]
-  },
+
+const CAPY_BUBBLE_LINES = [
+  'Chill tabs, happy capy.',
+  'Hydrate and close one tab. You deserve it.',
+  'The shoreline looks calmer already.',
+  'Small wins stack up¡Xkeep going!',
+  'Thanks for pacing yourself today.',
 ];
 
 /**
- * initVillagerDancer() - cycles through villager GIFs near the footer,
- * showing in-character dialogue on hover.
+ * Loads an SVG as <img> and applies lightweight CSS animation (see style.css mascot-anim-*).
  */
-function initVillagerDancer() {
-  const img    = document.getElementById('villagerDancer');
-  const bubble = document.getElementById('villagerBubble');
-  const wrap   = document.getElementById('villagerFooter');
-  if (!img || !bubble || !wrap) return;
+function renderCapyAsset(hostEl, src, baseClass, animName, width, height) {
+  if (!hostEl) return;
+  const animClass = animName ? ` mascot-anim-${animName}` : '';
+  hostEl.className = `${baseClass}${animClass}`;
+  hostEl.innerHTML =
+    `<img class="capy-mascot-img" src="${src}" alt="" width="${width}" height="${height}" draggable="false">`;
+}
 
-  let idx = Math.floor(Math.random() * VILLAGER_CAST.length);
+function randomCapyLine() {
+  return CAPY_BUBBLE_LINES[Math.floor(Math.random() * CAPY_BUBBLE_LINES.length)];
+}
 
-  function setVillager(i) {
-    const v = VILLAGER_CAST[i];
-    img.src = 'assets/villager dancing/' + v.file;
-    img.alt = v.name;
-  }
-
-  setVillager(idx);
-
-  // Click: switch to next villager (same logic as matrix villager)
-  wrap.addEventListener('click', () => {
-    img.style.opacity = '0';
-    bubble.classList.remove('visible');
-    setTimeout(() => {
-      idx = (idx + 1) % VILLAGER_CAST.length;
-      setVillager(idx);
-      img.style.opacity = '1';
-    }, 340);
-  });
-
-  // Hover: show a random dialogue line for the current villager
-  wrap.addEventListener('mouseenter', () => {
-    const v = VILLAGER_CAST[idx];
-    bubble.textContent = v.lines[Math.floor(Math.random() * v.lines.length)];
-    bubble.classList.add('visible');
-  });
-  wrap.addEventListener('mouseleave', () => {
-    bubble.classList.remove('visible');
-  });
+function initHeaderMascot() {
+  const host = document.getElementById('headerMascotHost');
+  if (!host || host.dataset.mascotInited === '1') return;
+  host.dataset.mascotInited = '1';
+  /* Bob runs on .header-mascot-stack in CSS; inner is static so leaf + head move together */
+  renderCapyAsset(host, CAPY_HEAD_SRC, 'header-mascot-inner', null, 70, 72);
 }
 
 /**
- * initMatrixVillager()  -  tiny villager in To-Do panel
- * Starts on a random villager, hover shows dialogue, click switches character.
- * Called after renderMatrixColumn() re-renders the DOM.
+ * Ocean capy ¡X hover / click bubble lines (same character).
  */
-let _matrixVillagerIdx = Math.floor(Math.random() * VILLAGER_CAST.length);
+function initFooterMascot() {
+  const host   = document.getElementById('footerMascotHost');
+  const bubble = document.getElementById('villagerBubble');
+  const wrap   = document.getElementById('villagerFooter');
+  if (!host || !bubble || !wrap || wrap.dataset.mascotInited === '1') return;
+  wrap.dataset.mascotInited = '1';
 
-function initMatrixVillager() {
-  const wrap   = document.getElementById('matrixVillagerWrap');
-  const img    = document.getElementById('matrixVillagerImg');
-  const bubble = document.getElementById('matrixVillagerBubble');
-  if (!wrap || !img || !bubble) return;
+  renderCapyAsset(host, CAPY_FULL_SRC, 'footer-mascot-host', 'sway', 96, 180);
 
-  function setVillager(i) {
-    const v = VILLAGER_CAST[i];
-    img.src = 'assets/villager dancing/' + v.file;
-    img.alt = v.name;
-  }
-  setVillager(_matrixVillagerIdx);
+  wrap.addEventListener('click', () => {
+    bubble.textContent = randomCapyLine();
+    bubble.classList.add('visible');
+  });
 
   wrap.addEventListener('mouseenter', () => {
-    const v = VILLAGER_CAST[_matrixVillagerIdx];
-    bubble.textContent = v.lines[Math.floor(Math.random() * v.lines.length)];
+    bubble.textContent = randomCapyLine();
     bubble.classList.add('visible');
   });
   wrap.addEventListener('mouseleave', () => {
     bubble.classList.remove('visible');
-  });
-  wrap.addEventListener('click', () => {
-    img.style.opacity = '0';
-    bubble.classList.remove('visible');
-    setTimeout(() => {
-      _matrixVillagerIdx = (_matrixVillagerIdx + 1) % VILLAGER_CAST.length;
-      setVillager(_matrixVillagerIdx);
-      img.style.opacity = '1';
-    }, 280);
   });
 }
 
@@ -504,14 +370,7 @@ async function renderMatrixColumn() {
     </div>
     <div class="matrix-grid">
       ${['do','schedule','delegate','cut'].map(renderQ).join('')}
-    </div>
-    <div class="matrix-villager-wrap" id="matrixVillagerWrap" title="Click to meet someone new!">
-      <div class="matrix-villager-bubble" id="matrixVillagerBubble"></div>
-      <img class="matrix-villager-img" id="matrixVillagerImg" src="" alt="">
     </div>`;
-
-  // Re-attach villager events after DOM re-render
-  initMatrixVillager();
 }
 
 async function addMatrixTask(text, quadrant) {
@@ -1486,7 +1345,11 @@ async function saveTabReassignments(data) {
   await storageSet(TAB_REASSIGN_KEY, data);
 }
 async function loadGroupMerges() {
-  return (await storageGet(GROUP_MERGE_KEY)) || [];
+  const raw = (await storageGet(GROUP_MERGE_KEY)) || [];
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(m => m && typeof m === 'object' && m.id != null)
+    .map(m => ({ ...m, domains: dedupeMergeDomains(m.domains) }));
 }
 async function saveGroupMerges(data) {
   await storageSet(GROUP_MERGE_KEY, data);
@@ -1496,6 +1359,31 @@ async function loadGroupOrder() {
 }
 async function saveGroupOrder(data) {
   await storageSet(GROUP_ORDER_KEY, data);
+}
+
+/** Normalized host for merge matching (lowercase, strip www.). Strings starting with `__` are left unchanged. */
+function mergeHostKey(d) {
+  if (!d || typeof d !== 'string') return '';
+  if (d.startsWith('__')) return d;
+  return d.replace(/^www\./i, '').toLowerCase();
+}
+
+function dedupeMergeDomains(domains) {
+  const seen = new Set();
+  const out = [];
+  for (const d of Array.isArray(domains) ? domains : []) {
+    if (typeof d !== 'string') continue;
+    const k = mergeHostKey(d);
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(d.startsWith('__') ? d : k);
+  }
+  return out;
+}
+
+function groupBelongsToMerge(groupDomain, mergeDomains) {
+  const gk = mergeHostKey(groupDomain);
+  return (mergeDomains || []).some(md => mergeHostKey(md) === gk);
 }
 
 /**
@@ -1518,23 +1406,52 @@ async function reassignTab(url, targetDomain) {
   await saveTabReassignments(data);
 }
 
+/** Remove tab from Chrome's native tab group (strip) when reassigned on the dashboard. */
+async function ungroupChromeTab(tabId) {
+  if (tabId == null || !Number.isFinite(tabId) || tabId <= 0) return;
+  if (!chrome.tabs?.ungroup) return;
+  try {
+    await chrome.tabs.ungroup([tabId]);
+  } catch (err) {
+    console.warn('[tab-out] tabs.ungroup failed:', err);
+  }
+}
+
+function parseChipTabId(chip) {
+  const raw = chip?.dataset?.dragTabId;
+  if (raw === undefined || raw === '') return null;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 async function mergeGroupDomains(domain1, domain2) {
   const merges = await loadGroupMerges();
-  const m1 = merges.find(m => m.domains.includes(domain1));
-  const m2 = merges.find(m => m.domains.includes(domain2));
+  const findMerge = dom =>
+    merges.find(m => m.domains.some(d => mergeHostKey(d) === mergeHostKey(dom)));
+  const addDomain = (arr, d) => {
+    if (!d) return;
+    const k = mergeHostKey(d);
+    if (arr.some(x => mergeHostKey(x) === k)) return;
+    arr.push(d.startsWith('__') ? d : k);
+  };
+  const m1 = findMerge(domain1);
+  const m2 = findMerge(domain2);
   let mergedDomains;
   if (m1 && m2 && m1 !== m2) {
-    m1.domains.push(...m2.domains.filter(d => !m1.domains.includes(d)));
+    for (const d of m2.domains) addDomain(m1.domains, d);
+    m1.domains = dedupeMergeDomains(m1.domains);
     merges.splice(merges.indexOf(m2), 1);
     mergedDomains = m1.domains;
   } else if (m1) {
-    if (!m1.domains.includes(domain2)) m1.domains.push(domain2);
+    addDomain(m1.domains, domain2);
+    m1.domains = dedupeMergeDomains(m1.domains);
     mergedDomains = m1.domains;
   } else if (m2) {
-    if (!m2.domains.includes(domain1)) m2.domains.push(domain1);
+    addDomain(m2.domains, domain1);
+    m2.domains = dedupeMergeDomains(m2.domains);
     mergedDomains = m2.domains;
   } else {
-    const entry = { id: Date.now().toString(36), domains: [domain1, domain2] };
+    const entry = { id: Date.now().toString(36), domains: dedupeMergeDomains([domain1, domain2]) };
     merges.push(entry);
     mergedDomains = entry.domains;
   }
@@ -1562,25 +1479,36 @@ async function applyChromeMergeGroup(domains) {
 
   try {
     const allTabs = await chrome.tabs.query({});
-    const tabIds = allTabs
-      .filter(t => {
-        try {
-          const host = new URL(t.url).hostname.replace(/^www\./, '');
-          return domains.some(d => host === d || host.endsWith('.' + d));
-        } catch { return false; }
-      })
-      .map(t => t.id);
+    const matchesHost = (hostNorm, d) => {
+      const dn = mergeHostKey(d);
+      return hostNorm === dn || (dn && hostNorm.endsWith('.' + dn));
+    };
+    const matched = allTabs.filter(t => {
+      try {
+        const hostNorm = mergeHostKey(new URL(t.url).hostname);
+        return domains.some(d => matchesHost(hostNorm, d));
+      } catch { return false; }
+    });
 
-    if (tabIds.length < 1) return;
+    if (matched.length < 1) return;
 
-    const groupId = await chrome.tabs.group({ tabIds });
+    // chrome.tabs.group only accepts tabs from the same window ¡X group per window.
+    const byWindow = new Map();
+    for (const t of matched) {
+      if (!byWindow.has(t.windowId)) byWindow.set(t.windowId, []);
+      byWindow.get(t.windowId).push(t.id);
+    }
 
-    // Pick a colour from the first domain's category
-    const firstCat = DOMAIN_CATEGORY_MAP[domains[0].replace(/^www\./, '')] || null;
+    const firstKey = mergeHostKey(domains[0] || '');
+    const firstCat = DOMAIN_CATEGORY_MAP[firstKey] || null;
     const color = (firstCat && CAT_TO_CHROME_COLOR[firstCat]) || 'grey';
-    const title = domains.map(d => friendlyDomain(d)).join(' + ');
+    const title = domains.map(d => friendlyDomain(mergeHostKey(d))).join(' + ');
 
-    await chrome.tabGroups.update(groupId, { title, color });
+    for (const tabIds of byWindow.values()) {
+      if (tabIds.length < 1) continue;
+      const groupId = await chrome.tabs.group({ tabIds });
+      await chrome.tabGroups.update(groupId, { title, color });
+    }
   } catch (err) {
     console.warn('[tab-out] Chrome tab group update failed:', err);
   }
@@ -1630,12 +1558,13 @@ async function applyDragCustomizations(groups) {
 
   // --- Group merges: combine multiple domain cards into one ---
   for (const merge of merges) {
-    const targets = groups.filter(g => merge.domains.includes(g.domain));
+    const targets = groups.filter(g => groupBelongsToMerge(g.domain, merge.domains));
     if (targets.length < 2) continue;
     const primary = targets[0];
     for (const g of targets.slice(1)) {
       primary.tabs.push(...g.tabs);
-      groups.splice(groups.indexOf(g), 1);
+      const gi = groups.indexOf(g);
+      if (gi !== -1) groups.splice(gi, 1);
     }
     primary.label        = targets.map(g => friendlyDomain(g.domain)).join(' + ');
     primary.mergeId      = merge.id;
@@ -1678,7 +1607,7 @@ function _updateCardTabCount(card) {
 }
 
 // --- Drag state ---
-let currentDrag      = null;  // { type:'tab'|'group', url?, fromDomain?, domain? }
+let currentDrag      = null;  // { type:'tab'|'group', url?, fromDomain?, domain?, tabId? }
 let dragOverCard     = null;  // current hovered .mission-card
 let mergeTimer       = null;  // setTimeout handle for shake trigger
 let mergeShakeActive = false; // true once the 500ms hold fires ¡X drop = merge, else = reorder
@@ -1734,8 +1663,8 @@ let domainGroups = [];
 /**
  * getRealTabs()
  *
- * Returns tabs that are real web pages ??? no chrome://, extension
- * pages, about:blank, etc.
+ * Returns tabs that are real web pages (no chrome://, extension
+ * pages, about:blank, etc.).
  */
 function getRealTabs() {
   return openTabs.filter(t => {
@@ -1789,7 +1718,7 @@ function buildOverflowChips(hiddenTabs, urlCounts = {}, sourceDomain = '') {
     return `<div class="page-chip clickable${chipClass}"
          draggable="true"
          data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
-         data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(sourceDomain)}">
+         data-drag-type="tab" data-drag-tab-id="${tab.id != null ? tab.id : ''}" data-drag-url="${safeUrl}" data-drag-from="${esc(sourceDomain)}">
       <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" data-img-fallback="leaf">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
@@ -1872,7 +1801,7 @@ function renderDomainCard(group) {
     return `<div class="page-chip clickable${chipClass}"
          draggable="true"
          data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}"
-         data-drag-type="tab" data-drag-url="${safeUrl}" data-drag-from="${esc(group.domain)}">
+         data-drag-type="tab" data-drag-tab-id="${tab.id != null ? tab.id : ''}" data-drag-url="${safeUrl}" data-drag-from="${esc(group.domain)}">
       <img class="chip-favicon" src="${faviconUrl || 'icons/leaf-favicon.svg'}" alt="" data-img-fallback="leaf">
       <span class="chip-text">${label}</span>${dupeTag}
       <div class="chip-actions">
@@ -2080,7 +2009,8 @@ async function renderStaticDashboard() {
   if (subEl)      subEl.textContent      = getGreetingSub();
   if (dateEl)     dateEl.textContent     = getDateDisplay();
   initWeather();         // async, updates #weatherLine when ready
-  initVillagerDancer();  // footer GIF cycle + hover dialogue
+  initHeaderMascot();
+  initFooterMascot();    // footer SVG buddy + hover dialogue
 
   // --- Fetch tabs ---
   await fetchOpenTabs();
@@ -2328,7 +2258,7 @@ document.addEventListener('click', async (e) => {
       banner.style.opacity = '0';
       setTimeout(() => { banner.style.display = 'none'; banner.style.opacity = '1'; }, 400);
     }
-    showToast('Closed extra Tab Out tabs');
+    showToast('Closed extra Capy Tab Manager tabs');
     return;
   }
 
@@ -2618,7 +2548,12 @@ document.addEventListener('dragstart', e => {
   const grip = e.target.closest('[data-drag-type="group"]');
 
   if (chip && !grip) {
-    currentDrag = { type: 'tab', url: chip.dataset.dragUrl, fromDomain: chip.dataset.dragFrom };
+    currentDrag = {
+      type: 'tab',
+      url: chip.dataset.dragUrl,
+      fromDomain: chip.dataset.dragFrom,
+      tabId: parseChipTabId(chip),
+    };
     e.dataTransfer.setData('text/plain', JSON.stringify(currentDrag));
     e.dataTransfer.effectAllowed = 'move';
     setTimeout(() => {
@@ -2688,6 +2623,7 @@ document.addEventListener('drop', async e => {
   if (currentDrag.type === 'tab' && dragOverCard?.id === 'newGroupDropZone' && currentDrag.url) {
     const soloKey = `__solo_${Date.now().toString(36)}`;
     await reassignTab(currentDrag.url, soloKey);
+    await ungroupChromeTab(currentDrag.tabId);
     showToast('New group created!');
     _clearDragState();
     await renderDashboard();
@@ -2700,6 +2636,7 @@ document.addEventListener('drop', async e => {
   if (currentDrag.type === 'tab') {
     if (targetDomain && targetDomain !== currentDrag.fromDomain && currentDrag.url) {
       await reassignTab(currentDrag.url, targetDomain);
+      await ungroupChromeTab(currentDrag.tabId);
       showToast('Tab moved!');
     }
   } else if (currentDrag.type === 'group') {
@@ -2723,6 +2660,38 @@ document.addEventListener('drop', async e => {
 document.addEventListener('dragend', () => {
   _clearDragState();
 });
+
+/* ----------------------------------------------------------------
+   Live dashboard refresh when tabs change (no manual reload)
+   ---------------------------------------------------------------- */
+let liveTabRefreshTimer = null;
+let liveTabRefreshDidInit = false;
+
+function scheduleDashboardRefresh() {
+  clearTimeout(liveTabRefreshTimer);
+  liveTabRefreshTimer = setTimeout(async () => {
+    liveTabRefreshTimer = null;
+    if (currentDrag) return;
+    try {
+      await renderDashboard();
+    } catch (e) {
+      console.warn('[tab-out] Live refresh render failed:', e);
+    }
+  }, 200);
+}
+
+function initLiveTabRefresh() {
+  if (!chrome.tabs?.onCreated || liveTabRefreshDidInit) return;
+  liveTabRefreshDidInit = true;
+  chrome.tabs.onCreated.addListener(scheduleDashboardRefresh);
+  chrome.tabs.onRemoved.addListener(scheduleDashboardRefresh);
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.discarded != null && Object.keys(changeInfo).length === 1) return;
+    scheduleDashboardRefresh();
+  });
+  chrome.tabs.onMoved.addListener(scheduleDashboardRefresh);
+  if (chrome.tabGroups?.onUpdated) chrome.tabGroups.onUpdated.addListener(scheduleDashboardRefresh);
+}
 
 // ---- Matrix input: live @ mention trigger ----
 document.addEventListener('input', (e) => {
@@ -2883,6 +2852,48 @@ document.addEventListener('error', e => {
 
 
 /* ----------------------------------------------------------------
+   GOOGLE APPS LAUNCHER (header 9-dot button)
+   ---------------------------------------------------------------- */
+function initGoogleAppsLauncher() {
+  const wrap = document.getElementById('googleAppsWrap');
+  const btn = document.getElementById('googleAppsBtn');
+  const panel = document.getElementById('googleAppsPanel');
+  if (!wrap || !btn || !panel) return;
+
+  function open() {
+    panel.hidden = false;
+    btn.setAttribute('aria-expanded', 'true');
+  }
+  function close() {
+    panel.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+  }
+  function toggle() {
+    if (panel.hidden) open(); else close();
+  }
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    toggle();
+  });
+
+  document.addEventListener('click', () => {
+    if (!panel.hidden) close();
+  });
+  wrap.addEventListener('click', e => e.stopPropagation());
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.hidden) close();
+  });
+
+  panel.addEventListener('click', e => {
+    if (e.target.closest('a')) close();
+  });
+}
+
+/* ----------------------------------------------------------------
    INITIALIZE
    ---------------------------------------------------------------- */
+initLiveTabRefresh();
+initGoogleAppsLauncher();
 renderDashboard();

@@ -4,8 +4,10 @@ node_modules/
 .DS_Store
 docs/superpowers/
 
-# Personal config (landing page patterns, etc.) — never push to GitHub
+# Personal config (landing page patterns, etc.) ??? never push to GitHub
 extension/config.local.js
 
 # Build artifact - regenerate locally with: bash pack.sh
+CapyTabManager.zip
+TabOut.zip
 IslandTabManager.zip
