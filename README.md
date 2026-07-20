@@ -72,6 +72,22 @@ For version update, repeat Step 1 for a new ZIP:
 - **Hover to delete** same interaction as closing a tab chip
 - **@ mention tabs** type `@` in the task input to link a task to an open tab group
 - **Persistent** tasks survive browser restarts via `chrome.storage.sync` + `localStorage` fallback
+- **Group-level triage** assign entire tab-group cards to a quadrant by drag-drop or card selector
+
+### Group-level Eisenhower triage actions
+- **Do (urgent + important):** marks the group as Do and focuses it immediately
+- **Schedule (important, not urgent):** saves every tab in the group to Saved for later, then closes the group
+- **Delegate (urgent, less important):** moves the group into a Delegate revisit list and collapses the Chrome tab group
+- **Cut (neither):** one-click closes all tabs in that group
+
+### Local session instrumentation
+- Every new-tab session is logged locally with:
+  - `timestamp`, `tabsAtStart`, `tabsAtEnd`
+  - `duplicatesRemoved`
+  - `healthStart`, `healthEnd`
+  - `triaged` counts for `do/schedule/delegate/cut`
+- Use **Export data** in the matrix panel to download both `.json` and `.csv` for analysis.
+- No telemetry is sent anywhere; exports are user-initiated files.
 
 ### Tab Health Heads Up Display
 - **Real-time score (0-100)** based on how organised your tabs are
@@ -109,6 +125,12 @@ Island Tab Manager uses **`chrome.storage.sync`**:
 | `tabGroups` | Auto-group tabs in Chrome when merging groups | Only affects your own browser |
 
 **No analytics. No ads. No external servers beyond Open-Meteo. Data is never sold, shared, or stored remotely.**
+
+## Cognitive-science rationale
+
+- **Cognitive offloading:** Group triage turns a large tab set into explicit external states (Do/Schedule/Delegate/Cut), reducing working-memory burden.
+- **Bounded rationality / satisficing:** The four fast actions provide good-enough decisions under attention limits rather than forcing perfect per-tab optimization.
+- **Heuristic decision matrices:** The Eisenhower quadrants act as a simple decision heuristic to prioritize urgency vs. importance at both task and tab-group level.
 
 ---
 

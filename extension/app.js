@@ -140,6 +140,12 @@ async function storageSet(key, value) {
 
 const MATRIX_KEY  = 'matrixTasks';
 const METRICS_KEY = 'tabOutMetrics';
+const GROUP_TRIAGE_KEY = 'groupQuadrants';
+const DELEGATE_LIST_KEY = 'delegateGroups';
+const SESSION_LOG_KEY = 'sessionLogs';
+
+let currentSessionLog = null;
+let didIncrementSessionMetric = false;
 
 async function loadMatrixTasks() {
   return (await storageGet(MATRIX_KEY)) || [];
@@ -161,6 +167,30 @@ async function incrementMetric(field, n = 1) {
   const m = await loadMetrics();
   m[field] = (m[field] || 0) + n;
   await storageSet(METRICS_KEY, m);
+}
+
+async function loadGroupTriages() {
+  return (await storageGet(GROUP_TRIAGE_KEY)) || {};
+}
+
+async function saveGroupTriages(data) {
+  await storageSet(GROUP_TRIAGE_KEY, data);
+}
+
+async function loadDelegateList() {
+  return (await storageGet(DELEGATE_LIST_KEY)) || [];
+}
+
+async function saveDelegateList(list) {
+  await storageSet(DELEGATE_LIST_KEY, list);
+}
+
+async function loadSessionLogs() {
+  return (await storageGet(SESSION_LOG_KEY)) || [];
+}
+
+async function saveSessionLogs(logs) {
+  await storageSet(SESSION_LOG_KEY, logs);
 }
 
 /* ============================================================
@@ -192,6 +222,50 @@ async function computeTabScore(openTabCount, windowCount) {
   } catch {}
 
   return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+async function getCurrentHealthScore() {
+  let windowCount = 0;
+  try {
+    const wins = await chrome.windows.getAll({ populate: false });
+    windowCount = wins.length;
+  } catch {}
+  return computeTabScore(getRealTabs().length, windowCount);
+}
+
+async function startSessionLogIfNeeded() {
+  if (currentSessionLog) return;
+  currentSessionLog = {
+    timestamp: new Date().toISOString(),
+    tabsAtStart: getRealTabs().length,
+    tabsAtEnd: getRealTabs().length,
+    duplicatesRemoved: 0,
+    healthStart: await getCurrentHealthScore(),
+    healthEnd: await getCurrentHealthScore(),
+    triaged: { do: 0, schedule: 0, delegate: 0, cut: 0 },
+  };
+}
+
+function trackTriageEvent(quadrant, amount = 1) {
+  if (!currentSessionLog?.triaged || !(quadrant in currentSessionLog.triaged)) return;
+  currentSessionLog.triaged[quadrant] += amount;
+}
+
+function trackDuplicatesRemoved(amount) {
+  if (!currentSessionLog) return;
+  currentSessionLog.duplicatesRemoved += Math.max(0, amount || 0);
+}
+
+async function flushSessionLogSnapshot() {
+  if (!currentSessionLog) return;
+  currentSessionLog.tabsAtEnd = getRealTabs().length;
+  currentSessionLog.healthEnd = await getCurrentHealthScore();
+
+  const logs = await loadSessionLogs();
+  const existingIndex = logs.findIndex(s => s.timestamp === currentSessionLog.timestamp);
+  if (existingIndex >= 0) logs[existingIndex] = currentSessionLog;
+  else logs.push(currentSessionLog);
+  await saveSessionLogs(logs);
 }
 
 function getScoreRating(score) {
@@ -452,6 +526,8 @@ async function renderMatrixColumn() {
   const panel = document.getElementById('matrixColumn');
   if (!panel) return;
   const tasks = await loadMatrixTasks();
+  const triages = await loadGroupTriages();
+  const delegatedGroups = await loadDelegateList();
 
   // Whole-row is the click target for toggle; delete button stops propagation
   const renderItem = (t) => `
@@ -471,11 +547,34 @@ async function renderMatrixColumn() {
   const renderQ = (q) => {
     const c = Q_CONFIG[q];
     const items = tasks.filter(t => t.quadrant === q);
+    const triagedGroups = domainGroups.filter(g => triages[g.domain] === q);
+    const delegatedForQ = q === 'delegate'
+      ? delegatedGroups.filter(d => !triagedGroups.some(g => g.domain === d.domain))
+      : [];
+    const groupPills = [...triagedGroups.map(g => ({
+      domain: g.domain,
+      label: g.label || friendlyDomain(g.domain),
+      tabCount: g.tabs.length,
+      stale: false,
+    })), ...delegatedForQ.map(d => ({
+      domain: d.domain,
+      label: d.label,
+      tabCount: d.tabCount || 0,
+      stale: true,
+    }))];
     return `
-      <div class="matrix-quadrant q-${q}" style="--qc:${c.color};--qt:${c.text}">
+      <div class="matrix-quadrant q-${q}" data-triage-quadrant="${q}" style="--qc:${c.color};--qt:${c.text}">
         <div class="matrix-q-hd">
           <span>${c.icon}</span><strong>${c.label}</strong>
           <span class="matrix-q-sub">${c.sub}</span>
+        </div>
+        <div class="matrix-group-drop" data-triage-quadrant="${q}">
+          <div class="matrix-group-drop-title">Group triage</div>
+          <div class="matrix-group-list">
+            ${groupPills.length
+              ? groupPills.map(g => `<button class="matrix-group-pill${g.stale ? ' stale' : ''}" data-action="focus-triaged-group" data-domain="${esc(g.domain)}">${esc(g.label)} <span>${g.tabCount}</span></button>`).join('')
+              : '<span class="matrix-q-empty">Drop group card here</span>'}
+          </div>
         </div>
         <div class="matrix-q-list">
           ${items.length ? items.map(renderItem).join('') : '<span class="matrix-q-empty">\u2014</span>'}
@@ -490,6 +589,7 @@ async function renderMatrixColumn() {
     <div class="section-header" style="margin-bottom:10px">
       <h2>To-Do</h2>
       <div class="section-line"></div>
+      <button class="action-btn" data-action="export-session-data" title="Export local research log">Export data</button>
     </div>
     <div class="matrix-q-pills" id="matrixQPills">
       ${Object.entries(Q_CONFIG).map(([q,c]) => `
@@ -788,6 +888,7 @@ async function closeDuplicateTabs(urls, keepOne = true) {
 
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
   await fetchOpenTabs();
+  return toClose.length;
 }
 
 /**
@@ -816,6 +917,89 @@ async function closeTabOutDupes() {
   const toClose = tabOutTabs.filter(t => t.id !== keep.id).map(t => t.id);
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
   await fetchOpenTabs();
+}
+
+async function collapseGroupInChrome(group, titleOverride = '') {
+  if (!chrome.tabs?.group || !chrome.tabGroups?.update || !group?.tabs?.length) return;
+  try {
+    const tabIds = group.tabs.map(t => t.id).filter(Boolean);
+    if (!tabIds.length) return;
+    const groupId = await chrome.tabs.group({ tabIds });
+    await chrome.tabGroups.update(groupId, {
+      collapsed: true,
+      title: titleOverride || `${friendlyDomain(group.domain)} (Delegate)`,
+      color: 'yellow',
+    });
+  } catch (err) {
+    console.warn('[tab-out] Collapse delegate group failed:', err);
+  }
+}
+
+async function closeGroupByIntent(group) {
+  const urls = group.tabs.map(t => t.url);
+  const useExact = group.domain === '__landing-pages__' || !!group.label;
+  if (useExact) await closeTabsExact(urls);
+  else await closeTabsByUrls(urls);
+}
+
+async function applyGroupTriage(domain, quadrant) {
+  const group = domainGroups.find(g => g.domain === domain);
+  if (!group) return;
+
+  const triages = await loadGroupTriages();
+  triages[domain] = quadrant;
+  await saveGroupTriages(triages);
+
+  const delegate = await loadDelegateList();
+  const delegateIndex = delegate.findIndex(d => d.domain === domain);
+
+  if (quadrant === 'do') {
+    await focusTab(group.tabs[0]?.url);
+    if (delegateIndex >= 0) {
+      delegate.splice(delegateIndex, 1);
+      await saveDelegateList(delegate);
+    }
+    showToast(`Do now: ${friendlyDomain(group.domain)} focused`);
+  } else if (quadrant === 'schedule') {
+    for (const tab of group.tabs) {
+      await saveTabForLater({ url: tab.url, title: tab.title || tab.url });
+    }
+    await closeGroupByIntent(group);
+    if (delegateIndex >= 0) {
+      delegate.splice(delegateIndex, 1);
+      await saveDelegateList(delegate);
+    }
+    await incrementMetric('tabsSaved', group.tabs.length);
+    await incrementMetric('tabsClosed', group.tabs.length);
+    showToast(`Scheduled ${group.tabs.length} tab${group.tabs.length !== 1 ? 's' : ''}`);
+  } else if (quadrant === 'delegate') {
+    const payload = {
+      id: Date.now().toString(36),
+      domain,
+      label: group.label || friendlyDomain(domain),
+      tabCount: group.tabs.length,
+      urls: group.tabs.map(t => t.url),
+      createdAt: new Date().toISOString(),
+    };
+    if (delegateIndex >= 0) delegate[delegateIndex] = payload;
+    else delegate.push(payload);
+    await saveDelegateList(delegate);
+    await collapseGroupInChrome(group, payload.label);
+    showToast(`Delegated ${payload.label}`);
+  } else if (quadrant === 'cut') {
+    await closeGroupByIntent(group);
+    if (delegateIndex >= 0) {
+      delegate.splice(delegateIndex, 1);
+      await saveDelegateList(delegate);
+    }
+    await incrementMetric('tabsClosed', group.tabs.length);
+    showToast(`Cut ${group.tabs.length} tab${group.tabs.length !== 1 ? 's' : ''}`);
+  }
+
+  trackTriageEvent(quadrant);
+  await fetchOpenTabs();
+  await flushSessionLogSnapshot();
+  await renderDashboard();
 }
 
 
@@ -1705,7 +1889,7 @@ function _removeNewGroupDropZone() {
 }
 function _clearDragOverCard() {
   if (dragOverCard) {
-    dragOverCard.classList.remove('drop-target', 'merge-target', 'merge-shake', 'drop-active');
+    dragOverCard.classList.remove('drop-target', 'merge-target', 'merge-shake', 'drop-active', 'triage-drop-target');
     dragOverCard = null;
   }
   clearTimeout(mergeTimer);
@@ -1922,6 +2106,14 @@ function renderDomainCard(group) {
     : 'Drag to reorder \u2014 hold 0.5s on another group to merge';
 
   const displayName = isLanding ? 'Homepages' : (group.label || friendlyDomain(group.domain));
+  const triageSelect = `
+    <label class="group-triage-label">
+      <span>Quadrant</span>
+      <select class="group-triage-select" data-action="select-group-quadrant" data-domain="${esc(group.domain)}">
+        <option value="">None</option>
+        ${Object.entries(Q_CONFIG).map(([key, cfg]) => `<option value="${key}"${group.triageQuadrant === key ? ' selected' : ''}>${cfg.label}</option>`).join('')}
+      </select>
+    </label>`;
 
   return `
     <div class="mission-card domain-card${group.isSolo ? ' solo-group' : ''}" data-domain-id="${stableId}"
@@ -1933,6 +2125,7 @@ function renderDomainCard(group) {
                 data-drag-type="group" data-drag-domain="${esc(group.domain)}"
                 title="${dragTitle}">${ICONS.grip}</span>
           <span class="mission-name">${displayName}</span>
+          ${triageSelect}
           ${tabBadge}
           ${catLabel}
           ${dupeBadge}
@@ -2084,6 +2277,11 @@ async function renderStaticDashboard() {
 
   // --- Fetch tabs ---
   await fetchOpenTabs();
+  await startSessionLogIfNeeded();
+  if (!didIncrementSessionMetric) {
+    await incrementMetric('sessions');
+    didIncrementSessionMetric = true;
+  }
   const realTabs = getRealTabs();
 
   // --- Group tabs by domain ---
@@ -2214,6 +2412,11 @@ async function renderStaticDashboard() {
     });
   }
 
+  const triageMap = await loadGroupTriages();
+  domainGroups.forEach(group => {
+    group.triageQuadrant = triageMap[group.domain] || '';
+  });
+
   // --- Render domain cards ---
   const openTabsSection      = document.getElementById('openTabsSection');
   const openTabsMissionsEl   = document.getElementById('openTabsMissions');
@@ -2235,9 +2438,6 @@ async function renderStaticDashboard() {
 
   // --- Metrics dashboard ---
   await renderMetrics(openTabs.length);
-
-  // --- Increment session counter ---
-  await incrementMetric('sessions');
 
   // --- Check for duplicate Tab Out tabs ---
   checkTabOutDupes();
@@ -2293,6 +2493,46 @@ document.addEventListener('click', async (e) => {
   if (action === 'insert-at-mention') {
     e.stopPropagation();
     insertAtMention(actionEl.dataset.atLabel);
+    return;
+  }
+
+  if (action === 'focus-triaged-group') {
+    e.stopPropagation();
+    const group = domainGroups.find(g => g.domain === actionEl.dataset.domain);
+    if (group?.tabs?.[0]?.url) {
+      await focusTab(group.tabs[0].url);
+      showToast(`Focused ${group.label || friendlyDomain(group.domain)}`);
+    }
+    return;
+  }
+
+  if (action === 'export-session-data') {
+    e.stopPropagation();
+    await flushSessionLogSnapshot();
+    const logs = await loadSessionLogs();
+    const jsonBlob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+    const csvHeader = 'timestamp,tabsAtStart,tabsAtEnd,duplicatesRemoved,healthStart,healthEnd,triaged_do,triaged_schedule,triaged_delegate,triaged_cut';
+    const csvRows = logs.map(s => [
+      s.timestamp, s.tabsAtStart, s.tabsAtEnd, s.duplicatesRemoved, s.healthStart, s.healthEnd,
+      s.triaged?.do || 0, s.triaged?.schedule || 0, s.triaged?.delegate || 0, s.triaged?.cut || 0,
+    ].join(','));
+    const csvBlob = new Blob([[csvHeader, ...csvRows].join('\n')], { type: 'text/csv' });
+
+    const dateTag = new Date().toISOString().slice(0, 10);
+    const dl = (blob, name) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 100);
+    };
+    dl(jsonBlob, `island-tab-sessions-${dateTag}.json`);
+    dl(csvBlob, `island-tab-sessions-${dateTag}.csv`);
+    showToast('Session data exported (.json and .csv)');
     return;
   }
 
@@ -2516,7 +2756,9 @@ document.addEventListener('click', async (e) => {
     const urls = urlsEncoded.split(',').map(u => decodeURIComponent(u)).filter(Boolean);
     if (urls.length === 0) return;
 
-    await closeDuplicateTabs(urls, true);
+    const removedCount = await closeDuplicateTabs(urls, true);
+    trackDuplicatesRemoved(removedCount);
+    await flushSessionLogSnapshot();
     playCloseSound();
 
     // Hide the dedup button
@@ -2639,21 +2881,27 @@ document.addEventListener('dragstart', e => {
 document.addEventListener('dragover', e => {
   if (!currentDrag) return;
   const card = e.target.closest('.mission-card');
-  if (!card) return;
+  const triageZone = e.target.closest('[data-triage-quadrant]');
+  if (!card && !triageZone) return;
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
 
-  if (card !== dragOverCard) {
+  const hoverTarget = triageZone || card;
+  if (hoverTarget !== dragOverCard) {
     _clearDragOverCard();
-    dragOverCard = card;
-    const targetDomain = card.dataset.dragDomain;
+    dragOverCard = hoverTarget;
+    const targetDomain = card?.dataset.dragDomain;
+    const targetQuadrant = triageZone?.dataset.triageQuadrant;
 
-    if (card.id === 'newGroupDropZone') {
+    if (targetQuadrant && currentDrag.type === 'group' && currentDrag.domain) {
+      triageZone.classList.add('triage-drop-target');
+      _showDragHint(`Release to triage as ${Q_CONFIG[targetQuadrant]?.label || targetQuadrant}`);
+    } else if (card && card.id === 'newGroupDropZone') {
       // Drop zone for creating a solo group
       card.classList.add('drop-active');
-    } else if (currentDrag.type === 'tab' && targetDomain !== currentDrag.fromDomain) {
+    } else if (card && currentDrag.type === 'tab' && targetDomain !== currentDrag.fromDomain) {
       card.classList.add('drop-target');
-    } else if (currentDrag.type === 'group' && targetDomain && targetDomain !== currentDrag.domain) {
+    } else if (card && currentDrag.type === 'group' && targetDomain && targetDomain !== currentDrag.domain) {
       // Start as a reorder hint; after 500ms upgrade to merge hint
       card.classList.add('drop-target');
       mergeTimer = setTimeout(() => {
@@ -2683,6 +2931,13 @@ document.addEventListener('dragleave', e => {
 document.addEventListener('drop', async e => {
   e.preventDefault();
   if (!currentDrag) { _clearDragState(); return; }
+
+  const triageQuadrant = dragOverCard?.dataset?.triageQuadrant;
+  if (triageQuadrant && currentDrag.type === 'group' && currentDrag.domain) {
+    await applyGroupTriage(currentDrag.domain, triageQuadrant);
+    _clearDragState();
+    return;
+  }
 
   // ---- New solo group: tab dropped on the + zone ----
   if (currentDrag.type === 'tab' && dragOverCard?.id === 'newGroupDropZone' && currentDrag.url) {
@@ -2722,6 +2977,22 @@ document.addEventListener('drop', async e => {
 
 document.addEventListener('dragend', () => {
   _clearDragState();
+});
+
+document.addEventListener('change', async (e) => {
+  const select = e.target.closest('[data-action="select-group-quadrant"]');
+  if (!select) return;
+  const domain = select.dataset.domain;
+  const quadrant = select.value;
+  if (!domain) return;
+  if (!quadrant) {
+    const triages = await loadGroupTriages();
+    delete triages[domain];
+    await saveGroupTriages(triages);
+    await renderDashboard();
+    return;
+  }
+  await applyGroupTriage(domain, quadrant);
 });
 
 // ---- Matrix input: live @ mention trigger ----
@@ -2880,6 +3151,16 @@ document.addEventListener('error', e => {
     }
   });
 })();
+
+window.addEventListener('beforeunload', () => {
+  flushSessionLogSnapshot();
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    flushSessionLogSnapshot();
+  }
+});
 
 
 /* ----------------------------------------------------------------

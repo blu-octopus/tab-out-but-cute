@@ -518,6 +518,27 @@ header {
   letter-spacing: 0;
 }
 
+.group-triage-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.group-triage-select {
+  border: 2px solid var(--warm-gray);
+  border-radius: var(--r-pill);
+  background: #fff;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+}
+
 /* Color-coded category label  -X assigned by getDomainCategory() */
 .category-pill {
   display: inline-block;
@@ -1824,6 +1845,57 @@ footer                                                   { animation: fadeUp 0.5
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.matrix-group-drop {
+  border: 1.5px dashed color-mix(in srgb, var(--qc, #e6dfc9) 85%, #555);
+  border-radius: 10px;
+  padding: 6px;
+  margin-bottom: 8px;
+  background: rgba(255,255,255,0.35);
+}
+
+.matrix-group-drop-title {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.matrix-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrix-group-pill {
+  border: 1.5px solid color-mix(in srgb, var(--qc, #e6dfc9) 80%, #666);
+  border-radius: 999px;
+  background: #fffef8;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: url('icons/cursor-finger.png') 0 0, pointer;
+}
+
+.matrix-group-pill span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.matrix-group-pill.stale {
+  opacity: 0.75;
+}
+
+.triage-drop-target {
+  outline: 2px dashed var(--accent-teal);
+  outline-offset: 2px;
 }
 
 .matrix-q-empty {
