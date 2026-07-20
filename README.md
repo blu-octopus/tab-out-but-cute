@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Island Tab Manager
 
 > Are you someone who is highkey more productive when a friendly shopkeeper keeps pushing you for bells?
@@ -170,3 +171,6 @@ Please keep credits intact.
 
 
 Hope you have a fun time! The shopkeeper believes in fair trade, hm hm!?
+=======
+# tab-manager
+>>>>>>> origin/main
